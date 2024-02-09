@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OAuth2 Client Demo</title>
+</head>
+<body>
+    <div th:if="${error}" th:text="${error}" style="color: darkred"></div>
+    <div th:if="${user == null}">
+        <a href="/login">
+            Connect your github account
+        </a>
+    </div>
+    <div th:if="${user != null}">
+        <p>
+            <span>Login: </span><span th:text="${user.get('login')}"></span>
+        </p>
+        <p>
+            <span>Name: </span><span th:text="${user.get('name')}"></span>
+        </p>
+        <p>
+            <span>Bio: </span><span th:text="${user.get('bio')}"></span>
+        </p>
+    </div>
+</body>
+</html>
