@@ -1,0 +1,32 @@
+### Create a new confidential client
+
+POST http://localhost:8080/realms/first-realm/clients
+Content-Type: application/json
+
+{
+  "name": "client 3",
+  "isConfidential": true,
+  "signInRedirectUris": "http://localhost:8081/oauth2/callback",
+  "signOutRedirectUris": "http://localhost:8081"
+}
+
+### Get clients
+
+GET http://localhost:8080/realms/first-realm/clients
+
+### Get client
+
+GET http://localhost:8080/realms/first-realm/clients/kV6GyiJazfTzxfXQsii12mTRTnBbhIEo
+
+### Create a new public client
+
+POST http://localhost:8080/realms/first-realm/clients
+Content-Type: application/json
+
+{
+  "name": "client 2",
+  "isConfidential": false,
+  "signInRedirectUris": "http://localhost:5001/oauth2/callback",
+  "signOutRedirectUris": "http://localhost:5001",
+  "webOrigins": "http://localhost:5001"
+}
