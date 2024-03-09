@@ -1,6 +1,7 @@
 package dev.javarush.oauth2.authorizationserver.client;
 
 import dev.javarush.oauth2.authorizationserver.util.Strings;
+import java.util.Base64;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,7 +51,7 @@ public class ClientService {
     byte[] secureRandomBytes = Strings.generateSecureRandomBytes(256);
     String secret = Strings.bytesToHex(secureRandomBytes);
     byte[] salt = Strings.generateSecureRandomBytes(32);
-    String saltString = new String(salt);
+    String saltString = Base64.getEncoder().encodeToString(salt);
     String secretHash = Strings.hash(secret, salt);
     ClientSecret secretToSave = new ClientSecret(null, clientId, secretHash);
     secretToSave.setSalt(saltString);
