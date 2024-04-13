@@ -8,6 +8,7 @@ import java.util.Random;
 public class Strings {
   private static final List<Character> DEFAULT_LAKE = new ArrayList<>();
   private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
   static {
     for (char c = 'a'; c <= 'z'; c++) {
       DEFAULT_LAKE.add(c);
@@ -40,7 +41,7 @@ public class Strings {
     return new String(hexChars);
   }
 
-  public static byte[] generateSecureRandomBytes (int length) {
+  public static byte[] generateSecureRandomBytes(int length) {
     SecureRandom secureRandom = new SecureRandom();
     byte[] values = new byte[length];
     secureRandom.nextBytes(values);

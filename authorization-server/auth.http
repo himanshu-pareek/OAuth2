@@ -1,0 +1,1 @@
+http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=code&scope=email+profile

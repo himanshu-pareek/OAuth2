@@ -7,7 +7,8 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Table("clients")
 public class Client implements Persistable<String> {
-  @Id private String id;
+  @Id
+  private String id;
   private String realmId;
   private String name;
   private boolean isConfidential;
@@ -22,12 +23,10 @@ public class Client implements Persistable<String> {
   @Transient
   private boolean isCreate;
 
-  public void setCreate(boolean create) {
-    isCreate = create;
-  }
-
-  public Client(String id, String realmId, String name, boolean isConfidential, String iconUrl, String homePageUrl, String description,
-                String privacyPolicyUrl, String signInRedirectUris, String signOutRedirectUris, String webOrigins) {
+  public Client(String id, String realmId, String name, boolean isConfidential, String iconUrl,
+                String homePageUrl, String description,
+                String privacyPolicyUrl, String signInRedirectUris, String signOutRedirectUris,
+                String webOrigins) {
     this.id = id;
     this.realmId = realmId;
     this.name = name;
@@ -41,13 +40,13 @@ public class Client implements Persistable<String> {
     this.webOrigins = webOrigins;
   }
 
-  public void setId(String id) {
-    this.id = id;
-  }
-
   @Override
   public String getId() {
     return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   @Override
@@ -55,12 +54,12 @@ public class Client implements Persistable<String> {
     return isCreate;
   }
 
-  public void setRealmId(String realmId) {
-    this.realmId = realmId;
-  }
-
   public String getRealmId() {
     return realmId;
+  }
+
+  public void setRealmId(String realmId) {
+    this.realmId = realmId;
   }
 
   public String getName() {
@@ -97,6 +96,10 @@ public class Client implements Persistable<String> {
 
   public boolean isCreate() {
     return isCreate;
+  }
+
+  public void setCreate(boolean create) {
+    isCreate = create;
   }
 
   public boolean isConfidential() {

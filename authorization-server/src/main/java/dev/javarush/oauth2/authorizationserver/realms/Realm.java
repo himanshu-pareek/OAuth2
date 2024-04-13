@@ -7,13 +7,14 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Table("realms")
 public class Realm implements Persistable<String> {
-  @Id private String id;
+  @Id
+  private String id;
   private String name;
 
   @Transient
   private boolean isCreate;
 
-  public Realm (String id, String name) {
+  public Realm(String id, String name) {
     this.id = id;
     this.name = name;
   }
