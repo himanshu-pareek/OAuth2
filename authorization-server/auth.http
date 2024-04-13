@@ -1,1 +1,32 @@
+### Invalid Realm
+http://localhost:9000/realms/first-real/auth
+
+### Invalid client id [ 1 ]
+http://localhost:9000/realms/first-realm/auth
+
+### Invalid client id [ 2 ]
+http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWM
+
+### Invalid Redirect URI [ 1 ]
+http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN
+
+### Invalid Redirect URI [ 2 ]
+http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callbac
+
+### Invalid Response Type [ 1 ]
+http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback
+
+### Invalid Response Type [ 2 ]
+http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=cod
+
+### Invalid Response Type [ 3 ]
+http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=token
+
+### Invalid Scope [ 1 ]
+http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=code
+
+### Invalid Scope [ 2 ]
+http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=code&scope=email+storage
+
+### Valid Auth URL
 http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=code&scope=email+profile

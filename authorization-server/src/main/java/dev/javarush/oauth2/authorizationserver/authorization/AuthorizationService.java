@@ -2,8 +2,8 @@ package dev.javarush.oauth2.authorizationserver.authorization;
 
 import dev.javarush.oauth2.authorizationserver.client.Client;
 import dev.javarush.oauth2.authorizationserver.client.ClientRepository;
+import dev.javarush.oauth2.authorizationserver.realms.Realm;
 import dev.javarush.oauth2.authorizationserver.realms.RealmRepository;
-import jakarta.servlet.http.HttpSession;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +25,13 @@ public class AuthorizationService {
     this.authRequestRepository = authRequestRepository;
   }
 
-  public void verifyAuthRequest(AuthRequest authRequest) {
-    validateRealm(authRequest);
+  public Realm verifyAuthRequest(AuthRequest authRequest) {
+    Realm realm = validateRealm(authRequest);
     Client client = validateClient(authRequest);
     validateRedirectUri(client, authRequest);
     validateResponseType(authRequest, client, authRequest.redirectUri());
     validateScope(authRequest, client, authRequest.redirectUri());
+    return realm;
   }
 
   private void validateScope(
@@ -51,7 +52,7 @@ public class AuthorizationService {
         throw new InvalidAuthRequestException(
             redirectUri,
             "invalid_scope",
-            "Scope not present"
+            "Scope not allowed"
         );
       }
     }
@@ -103,11 +104,11 @@ public class AuthorizationService {
     throw new InvalidAuthRequestException("Invalid redirect uri");
   }
 
-  private void validateRealm(AuthRequest authRequest) {
+  private Realm validateRealm(AuthRequest authRequest) {
     if (authRequest.realmId() == null) {
       throw new InvalidAuthRequestException("Realm is not present");
     }
-    this.realmRepository.findById(authRequest.realmId())
+    return this.realmRepository.findById(authRequest.realmId())
         .orElseThrow(() -> new InvalidAuthRequestException("Invalid realm"));
   }
 

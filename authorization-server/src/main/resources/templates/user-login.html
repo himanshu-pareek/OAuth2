@@ -5,6 +5,9 @@
     <title>Sign in</title>
 </head>
 <body>
+    <h1>
+        Login to <span style="color: blue" th:text="${realm.getName()}"></span>
+    </h1>
     <form method="post" th:action="${authActionURI}">
         <p>
             Username: <input type="text" name="username" />

@@ -2,6 +2,7 @@ package dev.javarush.oauth2.authorizationserver.authorization.ui;
 
 import dev.javarush.oauth2.authorizationserver.authorization.AuthRequest;
 import dev.javarush.oauth2.authorizationserver.authorization.AuthorizationService;
+import dev.javarush.oauth2.authorizationserver.realms.Realm;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +38,11 @@ public class AuthorizationController {
         query.get("scope"),
         query.get("state")
     );
-    this.authorizationService.verifyAuthRequest(authRequest);
+    logger.info("Authorization request: {}", authRequest);
+    Realm realm = this.authorizationService.verifyAuthRequest(authRequest);
     String authRequestId = this.authorizationService.getAuthRequestId (authRequest);
     String authActionURI = "/realms/" + realmId + "/auth/" + authRequestId;
+    model.addAttribute("realm", realm);
     model.addAttribute("authActionURI", authActionURI);
     return "user-login";
   }
