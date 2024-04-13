@@ -128,4 +128,14 @@ public class AuthorizationService {
   public String getAuthRequestId(AuthRequest authRequest) {
     return this.authRequestRepository.saveAuthRequest(authRequest);
   }
+
+  public AuthRequest getAuthRequestById(String realmId, String authRequestId) {
+    AuthRequest authRequest = this.authRequestRepository.findById (authRequestId).orElseThrow(
+        () -> new InvalidAuthRequestException("Invalid request")
+    );
+    if (!realmId.equals(authRequest.realmId())) {
+      throw new InvalidAuthRequestException("Invalid request");
+    }
+    return authRequest;
+  }
 }

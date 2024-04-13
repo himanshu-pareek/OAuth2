@@ -8,6 +8,7 @@
     <h1>
         Login to <span style="color: blue" th:text="${realm.getName()}"></span>
     </h1>
+    <p th:if="${error}" th:text="${error}" style="color: darkred"></p>
     <form method="post" th:action="${authActionURI}">
         <p>
             Username: <input type="text" name="username" />

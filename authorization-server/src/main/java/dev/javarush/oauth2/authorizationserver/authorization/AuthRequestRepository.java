@@ -3,6 +3,7 @@ package dev.javarush.oauth2.authorizationserver.authorization;
 import dev.javarush.oauth2.authorizationserver.util.Strings;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -21,5 +22,9 @@ public class AuthRequestRepository {
     }
     this.authRequests.put(id, authRequest);
     return id;
+  }
+
+  public Optional<AuthRequest> findById(String id) {
+    return this.authRequests.containsKey(id) ? Optional.of(this.authRequests.get(id)) : Optional.empty();
   }
 }

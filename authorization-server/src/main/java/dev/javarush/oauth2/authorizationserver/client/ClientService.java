@@ -31,7 +31,7 @@ public class ClientService {
     return this.clientRepository.findAllByRealmId(realmId);
   }
 
-  Client getById(String realmId, String clientId) {
+  public Client getById(String realmId, String clientId) {
     Client client = this.clientRepository.findById(clientId).orElse(null);
     if (client == null) {
       return null;
