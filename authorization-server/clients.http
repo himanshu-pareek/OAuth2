@@ -12,7 +12,7 @@ Content-Type: application/json
 
 ### Get clients
 
-GET http://localhost:9000/realms/first-realm/clients
+GET http://localhost:9000/realms/java/clients
 
 ### Get client
 

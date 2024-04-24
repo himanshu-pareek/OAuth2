@@ -12,10 +12,10 @@ public class UserRepository {
 
   public UserRepository() {
     users = new ArrayList<>();
-    users.add(new User("user1", "pass1", "first-realm"));
-    users.add(new User("user2", "pass2", "first-realm"));
-    users.add(new User("user3", "pass3", "second-realm"));
-    users.add(new User("user4", "pass4", "second-realm"));
+  }
+
+  public void save(User user) {
+    this.users.add(user);
   }
 
   public Optional<User> login(String username, String password, String realmId) {

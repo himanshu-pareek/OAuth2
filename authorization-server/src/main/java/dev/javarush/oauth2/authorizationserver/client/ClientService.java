@@ -16,7 +16,7 @@ public class ClientService {
     this.clientSecretRepository = clientSecretRepository;
   }
 
-  Client createClient(String realmId, Client client) {
+  public Client createClient(String realmId, Client client) {
     String clientId = Strings.generateRandomString(32);
     while (this.clientRepository.findById(clientId).orElse(null) != null) {
       clientId = Strings.generateRandomString(32);
@@ -42,7 +42,7 @@ public class ClientService {
     return client;
   }
 
-  ClientSecret generateClientSecret(String clientId) {
+  public ClientSecret generateClientSecret(String clientId) {
     Client client = this.clientRepository.findById(clientId).orElse(null);
     if (client == null) {
       throw new RuntimeException("Client with id = " + clientId + " does not exists.");

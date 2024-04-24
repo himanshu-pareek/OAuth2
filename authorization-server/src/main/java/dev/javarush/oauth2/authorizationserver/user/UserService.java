@@ -1,7 +1,6 @@
 package dev.javarush.oauth2.authorizationserver.user;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +20,6 @@ public class UserService {
 
   public void saveSession(User user, String realmId, HttpSession session) {
     session.removeAttribute(realmId);
-    session.setAttribute(realmId, user);
+    session.setAttribute(realmId, new UserSession(user));
   }
 }

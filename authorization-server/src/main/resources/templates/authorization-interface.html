@@ -6,10 +6,11 @@
 </head>
 <body>
 <header>
-    My Authorization Server | Signed in as <span th:text="${user.username}"></span>
+    My Authorization Server | Signed in as <span style="font-weight: bold" th:text="${user.username}"></span>
 </header>
 <main>
     <h1 th:text="${client.getName()}"></h1>
+    <p th:text="${client.getDescription()}"></p>
     <p th:text="${client.getHomePageUrl()}"></p>
     <hr>
     This app wants to:

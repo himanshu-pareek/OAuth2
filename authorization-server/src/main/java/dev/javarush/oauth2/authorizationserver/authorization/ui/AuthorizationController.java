@@ -72,7 +72,7 @@ public class AuthorizationController {
       Model model
   ) {
     AuthRequest authRequest = this.authorizationService.getAuthRequestById (realmId, authRequestId);
-    User user = null;
+    User user;
     try {
       user = this.userService.validateUser (username, password, realmId);
     } catch (UserNotFoundException e) {
