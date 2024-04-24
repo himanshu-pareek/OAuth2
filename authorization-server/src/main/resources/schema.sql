@@ -1,6 +1,3 @@
-DELETE FROM client_secrets;
-DELETE FROM clients;
-
 CREATE TABLE IF NOT EXISTS realms (
     id varchar(20) NOT NULL PRIMARY KEY,
     name varchar(30) NOT NULL
@@ -20,8 +17,6 @@ CREATE TABLE IF NOT EXISTS clients (
     web_origins TEXT,
     FOREIGN KEY (realm_id) REFERENCES realms(id)
 );
-
-DROP TABLE client_secrets;
 
 CREATE TABLE IF NOT EXISTS client_secrets (
     id SERIAL NOT NULL PRIMARY KEY,

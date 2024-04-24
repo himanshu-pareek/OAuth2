@@ -12,7 +12,7 @@ public class RealmService {
     this.repository = repository;
   }
 
-  public Realm createRealm (String realmName) {
+  public Realm createRealm(String realmName) {
     String realmId = generateIdFromName(realmName);
     if (this.repository.findById(realmId).orElse(null) != null) {
       throw new RuntimeException("Realm already present.");
@@ -22,15 +22,15 @@ public class RealmService {
     return this.repository.save(realm);
   }
 
-  public Realm getRealm (String id) {
+  public Realm getRealm(String id) {
     return this.repository.findById(id).orElse(null);
   }
 
-  public Iterable<Realm> getAllRealms () {
+  public Iterable<Realm> getAllRealms() {
     return this.repository.findAll();
   }
 
-  private String generateIdFromName (String name) {
+  private String generateIdFromName(String name) {
     String[] words = name.split(" ");
     for (int i = 0; i < words.length; i++) {
       words[i] = words[i].toLowerCase();

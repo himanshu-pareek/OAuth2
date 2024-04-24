@@ -16,31 +16,33 @@ public class ClientService {
     this.clientSecretRepository = clientSecretRepository;
   }
 
-  Client createClient (String realmId, Client client) {
+  Client createClient(String realmId, Client client) {
     String clientId = Strings.generateRandomString(32);
     while (this.clientRepository.findById(clientId).orElse(null) != null) {
       clientId = Strings.generateRandomString(32);
     }
     client.setId(clientId);
-    client.setRealmId (realmId);
+    client.setRealmId(realmId);
     client.setCreate(true);
     return this.clientRepository.save(client);
   }
 
-  Iterable<Client> getAll (String realmId) {
+  Iterable<Client> getAll(String realmId) {
     return this.clientRepository.findAllByRealmId(realmId);
   }
 
-  Client getById (String realmId, String clientId) {
+  Client getById(String realmId, String clientId) {
     Client client = this.clientRepository.findById(clientId).orElse(null);
-    if (client == null) return null;
+    if (client == null) {
+      return null;
+    }
     if (!client.getRealmId().equals(realmId)) {
       return null;
     }
     return client;
   }
 
-  ClientSecret generateClientSecret (String clientId) {
+  ClientSecret generateClientSecret(String clientId) {
     Client client = this.clientRepository.findById(clientId).orElse(null);
     if (client == null) {
       throw new RuntimeException("Client with id = " + clientId + " does not exists.");

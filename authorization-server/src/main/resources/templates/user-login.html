@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign in</title>
+</head>
+<body>
+    <h1>
+        Login to <span style="color: blue" th:text="${realm.getName()}"></span>
+    </h1>
+    <form method="post" th:action="${authActionURI}">
+        <p>
+            Username: <input type="text" name="username" />
+        </p>
+        <p>
+            Password: <input type="password" name="password" />
+        </p>
+        <p>
+            <button type="submit">Sign in</button>
+        </p>
+    </form>
+</body>
+</html>

@@ -7,7 +7,8 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("client_secrets")
 @JsonIgnoreProperties({"salt"})
 public class ClientSecret {
-  @Id private Integer id;
+  @Id
+  private Integer id;
   private String clientId;
   private String secret;
   private String salt;
@@ -30,11 +31,11 @@ public class ClientSecret {
     return secret;
   }
 
-  public void setSalt(String salt) {
-    this.salt = salt;
-  }
-
   public String getSalt() {
     return salt;
+  }
+
+  public void setSalt(String salt) {
+    this.salt = salt;
   }
 }

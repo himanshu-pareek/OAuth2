@@ -24,22 +24,22 @@ public class ClientController {
   }
 
   @GetMapping
-  public Iterable<Client> getAll (@PathVariable("realmId") String realmId) {
+  public Iterable<Client> getAll(@PathVariable("realmId") String realmId) {
     return this.clientService.getAll(realmId);
   }
 
   @GetMapping("{id}")
-  public Client get (@PathVariable("realmId") String realmId, @PathVariable("id") String clientId) {
+  public Client get(@PathVariable("realmId") String realmId, @PathVariable("id") String clientId) {
     return this.clientService.getById(realmId, clientId);
   }
 
   @PostMapping("{id}/secrets")
-  public ClientSecret generateSecret (@PathVariable("id") String clientId) {
+  public ClientSecret generateSecret(@PathVariable("id") String clientId) {
     return this.clientService.generateClientSecret(clientId);
   }
 
   @DeleteMapping("{id}/secrets/{secretId}")
-  public void deleteClientSecret (@PathVariable("secretId") Integer secretId) {
-    this.clientService.deleteClientSecret (secretId);
+  public void deleteClientSecret(@PathVariable("secretId") Integer secretId) {
+    this.clientService.deleteClientSecret(secretId);
   }
 }
