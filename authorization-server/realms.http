@@ -11,4 +11,4 @@ GET http://localhost:8080/realms/first-realm
 
 ###
 
-GET http://localhost:8080/realms
+GET http://localhost:9000/realms

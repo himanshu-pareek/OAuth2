@@ -25,3 +25,7 @@ CREATE TABLE IF NOT EXISTS client_secrets (
     salt TEXT NOT NULL,
     FOREIGN KEY (client_id) REFERENCES clients(id)
 );
+
+DELETE FROM client_secrets;
+DELETE FROM clients;
+DELETE FROM realms;
