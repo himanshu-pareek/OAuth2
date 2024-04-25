@@ -8,6 +8,7 @@ import dev.javarush.oauth2.authorizationserver.realms.Realm;
 import dev.javarush.oauth2.authorizationserver.realms.RealmService;
 import dev.javarush.oauth2.authorizationserver.user.User;
 import dev.javarush.oauth2.authorizationserver.user.UserNotFoundException;
+import dev.javarush.oauth2.authorizationserver.user.UserNotLoggedInException;
 import dev.javarush.oauth2.authorizationserver.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("realms/{realmId}/auth")
@@ -43,7 +45,8 @@ public class AuthorizationController {
   public String handleAuthRequest(
       @PathVariable("realmId") String realmId,
       @RequestParam Map<String, String> query,
-      Model model
+      Model model,
+      HttpServletRequest request
   ) {
     AuthRequest authRequest = new AuthRequest(
         realmId,
@@ -56,10 +59,28 @@ public class AuthorizationController {
     logger.info("Authorization request: {}", authRequest);
     Realm realm = this.authorizationService.verifyAuthRequest(authRequest);
     String authRequestId = this.authorizationService.getAuthRequestId (authRequest);
-    String authActionURI = "/realms/" + realmId + "/auth/" + authRequestId + "/login";
-    model.addAttribute("realm", realm);
-    model.addAttribute("authActionURI", authActionURI);
-    return "user-login";
+    try {
+      User user = this.userService.getLoggedInUser(request.getSession(), realmId);
+      return presentAuthorizationInterface(realmId, model, authRequest, authRequestId, user);
+    } catch (UserNotLoggedInException e) {
+      String authActionURI = "/realms/" + realmId + "/auth/" + authRequestId + "/login";
+      model.addAttribute("realm", realm);
+      model.addAttribute("authActionURI", authActionURI);
+      return "user-login";
+    }
+  }
+
+  private String presentAuthorizationInterface(
+      @PathVariable("realmId") String realmId, Model model,
+      AuthRequest authRequest, String authRequestId, User user) {
+    Client client = this.clientService.getById(realmId, authRequest.clientId());
+    model.addAttribute("client", client);
+    model.addAttribute("user", user);
+    String denyActionURI = "/realms/" + realmId + "/auth/" + authRequestId + "/deny";
+    String allowActionURI = "/realms/" + realmId + "/auth/" + authRequestId + "/allow";
+    model.addAttribute("denyActionURI", denyActionURI);
+    model.addAttribute("allowActionURI", allowActionURI);
+    return "authorization-interface";
   }
 
   @PostMapping("{authRequestId}/login")
@@ -83,9 +104,26 @@ public class AuthorizationController {
       return "user-login";
     }
     this.userService.saveSession(user, realmId, request.getSession());
-    Client client = this.clientService.getById(realmId, authRequest.clientId());
-    model.addAttribute("client", client);
-    model.addAttribute("user", user);
-    return "authorization-interface";
+    return presentAuthorizationInterface(realmId, model, authRequest, authRequestId, user);
+  }
+
+  @GetMapping("{authRequestId}/deny")
+  public ModelAndView handleAuthorizationDeny(
+      @PathVariable("realmId") String realmId,
+      @PathVariable("authRequestId") String authRequestId,
+      HttpServletRequest request,
+      Model model
+  ) {
+    var authRequest = this.authorizationService.getAuthRequestById (realmId, authRequestId);
+    try {
+      this.userService.getLoggedInUser(request.getSession(), realmId);
+    } catch (UserNotLoggedInException e) {
+      var query = this.authorizationService.getAuthRequestMap(authRequest);
+      model.addAllAttributes(query);
+      return new ModelAndView("redirect:/realms/" + realmId + "/auth", model.asMap());
+    }
+    this.authorizationService.denyAuthRequest(authRequest);
+    model.addAttribute("error", "You are not authorized to access this resource");
+    return new ModelAndView("error", model.asMap());
   }
 }

@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Authorize Application</title>
+    <style>
+        button > a {
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
 <header>
@@ -22,8 +27,8 @@
             View your profile
         </li>
     </ul>
-    <button>Deny</button>
-    <button>Allow</button>
+    <button><a th:href="${denyActionURI}">Deny</a></button>
+    <button><a th:href="${allowActionURI}">Allow</a></button>
 </main>
 </body>
 </html>

@@ -8,7 +8,7 @@ public class UserSession {
   private final LocalDateTime expiresAt;
 
   public UserSession(User user) {
-    this (user, LocalDateTime.now().plusMinutes(5));
+    this (user, LocalDateTime.now().plusMinutes(1));
   }
 
   public UserSession(User user, LocalDateTime expiresAt) {

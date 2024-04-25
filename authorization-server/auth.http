@@ -20,7 +20,7 @@ http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffW
 http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=cod
 
 ### Invalid Response Type [ 3 ]
-http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=token
+http://localhost:9000/realms/java/auth?client_id=H7WyNTe9FlaIqWzVsR13o1KwdRQnTITV&redirect_uri=http://localhost:8081/oauth/callback&response_type=token
 
 ### Invalid Scope [ 1 ]
 http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=code
@@ -29,4 +29,4 @@ http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffW
 http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=code&scope=email+storage
 
 ### Valid Auth URL
-http://localhost:9000/realms/java/auth?client_id=1QbtE2EWlVPJDLrB1evXdxAQlKdl0Esr&redirect_uri=http://localhost:8081/oauth/callback&response_type=code&scope=email+profile
+http://localhost:9000/realms/java/auth?client_id=vdGo2d8KK2RRKTYKPoo8wbPK4wahw4Qj&redirect_uri=http://localhost:8081/oauth/callback&response_type=code&scope=email+profile

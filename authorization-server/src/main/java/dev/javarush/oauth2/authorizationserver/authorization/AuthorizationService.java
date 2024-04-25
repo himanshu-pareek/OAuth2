@@ -4,6 +4,8 @@ import dev.javarush.oauth2.authorizationserver.client.Client;
 import dev.javarush.oauth2.authorizationserver.client.ClientRepository;
 import dev.javarush.oauth2.authorizationserver.realms.Realm;
 import dev.javarush.oauth2.authorizationserver.realms.RealmRepository;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 
@@ -137,5 +139,23 @@ public class AuthorizationService {
       throw new InvalidAuthRequestException("Invalid request");
     }
     return authRequest;
+  }
+
+  public Map<String, String> getAuthRequestMap(AuthRequest authRequest) {
+    Map<String, String> authRequestMap = new HashMap<>();
+    authRequestMap.put("client_id", authRequest.clientId());
+    authRequestMap.put("redirect_uri", authRequest.redirectUri());
+    authRequestMap.put("response_type", authRequest.responseType());
+    authRequestMap.put("scope", authRequest.scope());
+    authRequestMap.put("state", authRequest.state());
+    return authRequestMap;
+  }
+
+  public void denyAuthRequest(AuthRequest authRequest) {
+    throw new InvalidAuthRequestException(
+        authRequest.redirectUri(),
+        "access_denied",
+        "Access denied"
+    );
   }
 }

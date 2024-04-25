@@ -1,6 +1,7 @@
 package dev.javarush.oauth2.authorizationserver.user;
 
 import jakarta.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,5 +22,16 @@ public class UserService {
   public void saveSession(User user, String realmId, HttpSession session) {
     session.removeAttribute(realmId);
     session.setAttribute(realmId, new UserSession(user));
+  }
+
+  public User getLoggedInUser(HttpSession session, String realmId) throws UserNotLoggedInException {
+    UserSession userSession = (UserSession) session.getAttribute(realmId);
+    if (userSession == null) {
+      throw new UserNotLoggedInException();
+    }
+    if (userSession.getExpiresAt().isBefore(LocalDateTime.now())) {
+      throw new UserNotLoggedInException("Session expired");
+    }
+    return userSession.getUser();
   }
 }
