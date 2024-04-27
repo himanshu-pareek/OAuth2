@@ -126,4 +126,26 @@ public class AuthorizationController {
     model.addAttribute("error", "You are not authorized to access this resource");
     return new ModelAndView("error", model.asMap());
   }
+
+  @GetMapping("{authRequestId}/allow")
+  public ModelAndView handleAuthorizationAllow(
+      @PathVariable("realmId") String realmId,
+      @PathVariable("authRequestId") String authRequestId,
+      HttpServletRequest request,
+      Model model
+  ) {
+    var authRequest = this.authorizationService.getAuthRequestById (realmId, authRequestId);
+    try {
+      User loggedInUser = this.userService.getLoggedInUser(request.getSession(), realmId);
+      String code = this.authorizationService.allowAuthRequest(authRequest, loggedInUser);
+      model.addAttribute("code", code);
+      model.addAttribute("code", code);
+      model.addAttribute("state", authRequest.state());
+      return new ModelAndView("redirect:" + authRequest.redirectUri(), model.asMap());
+    } catch (UserNotLoggedInException e) {
+      var query = this.authorizationService.getAuthRequestMap(authRequest);
+      model.addAllAttributes(query);
+      return new ModelAndView("redirect:/realms/" + realmId + "/auth", model.asMap());
+    }
+  }
 }

@@ -4,15 +4,25 @@ import dev.javarush.oauth2.authorizationserver.client.Client;
 import dev.javarush.oauth2.authorizationserver.client.ClientRepository;
 import dev.javarush.oauth2.authorizationserver.realms.Realm;
 import dev.javarush.oauth2.authorizationserver.realms.RealmRepository;
+import dev.javarush.oauth2.authorizationserver.user.User;
+import dev.javarush.oauth2.authorizationserver.util.AESUtil;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthorizationService {
   private final Set<String> VALID_RESPONSE_TYPES = Set.of("code", "token");
   private final Set<String> AVAILABLE_SCOPES = Set.of("email", "profile");
+
+  @Value("${auth.code.aes.secret.key}")
+  private String authCodeAesSecretKey;
 
   private final RealmRepository realmRepository;
   private final ClientRepository clientRepository;
@@ -157,5 +167,58 @@ public class AuthorizationService {
         "access_denied",
         "Access denied"
     );
+  }
+
+  public String allowAuthRequest(AuthRequest authRequest, User user) {
+    AuthorizationCode authorizationCode =
+        AuthorizationCode.authorizationCode(authRequest.realmId(), authRequest.clientId(),
+            authRequest.redirectUri(), user.getUsername());
+    try {
+      return encodeAuthorizationCode(authorizationCode);
+    } catch (RuntimeException e) {
+      throw new InvalidAuthRequestException(
+          authRequest.redirectUri(),
+          "server_error",
+          "Something went wrong"
+      );
+    }
+  }
+
+  public String encodeAuthorizationCode (AuthorizationCode authorizationCode) {
+    String code = authorizationCode.toString();
+    return encryptCode(code);
+  }
+
+  public AuthorizationCode decodeAuthorizationCode (String encryptedCode) {
+    String code = decryptCode(encryptedCode);
+    return AuthorizationCode.authCodeFromString(code);
+  }
+
+  private String encryptCode (String code) {
+    IvParameterSpec ivParameterSpec = new IvParameterSpec(new byte[16]);
+    byte[] codeBytes = code.getBytes(StandardCharsets.UTF_8);
+    try {
+      SecretKey secretKey = AESUtil.generateKey(authCodeAesSecretKey);
+      byte[] encryptedCodeBytes = AESUtil.encrypt(secretKey, codeBytes, ivParameterSpec);
+      return Base64.getEncoder().encodeToString(encryptedCodeBytes);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private String decryptCode (String encryptedCode) {
+    IvParameterSpec ivParameterSpec = new IvParameterSpec(new byte[16]);
+    byte[] encryptedCodeBytes = Base64.getDecoder().decode(encryptedCode);
+    try {
+      SecretKey secretKey = AESUtil.generateKey(authCodeAesSecretKey);
+      byte[] codeBytes = AESUtil.decrypt(secretKey, encryptedCodeBytes, ivParameterSpec);
+      return new String(codeBytes, StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void setAuthCodeAesSecretKey(String authCodeAesSecretKey) {
+    this.authCodeAesSecretKey = authCodeAesSecretKey;
   }
 }
