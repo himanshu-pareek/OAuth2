@@ -6,11 +6,15 @@ import dev.javarush.oauth2.authorizationserver.client.Client;
 import dev.javarush.oauth2.authorizationserver.client.ClientService;
 import dev.javarush.oauth2.authorizationserver.realms.Realm;
 import dev.javarush.oauth2.authorizationserver.realms.RealmService;
+import dev.javarush.oauth2.authorizationserver.scope.Scope;
 import dev.javarush.oauth2.authorizationserver.user.User;
 import dev.javarush.oauth2.authorizationserver.user.UserNotFoundException;
 import dev.javarush.oauth2.authorizationserver.user.UserNotLoggedInException;
 import dev.javarush.oauth2.authorizationserver.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,9 +75,17 @@ public class AuthorizationController {
   }
 
   private String presentAuthorizationInterface(
-      @PathVariable("realmId") String realmId, Model model,
-      AuthRequest authRequest, String authRequestId, User user) {
+      String realmId,
+      Model model,
+      AuthRequest authRequest,
+      String authRequestId,
+      User user
+  ) {
+    Realm realm = this.realmService.getRealm(realmId);
     Client client = this.clientService.getById(realmId, authRequest.clientId());
+    Collection<Scope> scopes = this.authorizationService.getAllScopes (authRequest);
+    model.addAttribute("realm", realm);
+    model.addAttribute("scopes", scopes);
     model.addAttribute("client", client);
     model.addAttribute("user", user);
     String denyActionURI = "/realms/" + realmId + "/auth/" + authRequestId + "/deny";
@@ -127,7 +139,7 @@ public class AuthorizationController {
     return new ModelAndView("error", model.asMap());
   }
 
-  @GetMapping("{authRequestId}/allow")
+  @PostMapping("{authRequestId}/allow")
   public ModelAndView handleAuthorizationAllow(
       @PathVariable("realmId") String realmId,
       @PathVariable("authRequestId") String authRequestId,
@@ -137,7 +149,11 @@ public class AuthorizationController {
     var authRequest = this.authorizationService.getAuthRequestById (realmId, authRequestId);
     try {
       User loggedInUser = this.userService.getLoggedInUser(request.getSession(), realmId);
-      String code = this.authorizationService.allowAuthRequest(authRequest, loggedInUser);
+      Collection<String> selectedScopes = this.authorizationService.getSelectedScopes (
+              authRequest,
+              request.getParameterValues("selectedScopes")
+      );
+      String code = this.authorizationService.allowAuthRequest(authRequest, loggedInUser, selectedScopes);
       model.addAttribute("code", code);
       model.addAttribute("code", code);
       model.addAttribute("state", authRequest.state());

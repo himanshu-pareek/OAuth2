@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import dev.javarush.oauth2.authorizationserver.client.ClientRepository;
 import dev.javarush.oauth2.authorizationserver.realms.RealmRepository;
 import java.time.ZoneOffset;
+import java.util.Set;
+
+import dev.javarush.oauth2.authorizationserver.scope.ScopeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,12 +22,14 @@ class AuthorizationServiceTest {
   private ClientRepository clientRepository;
   @MockBean
   private AuthRequestRepository authRequestRepository;
+  @MockBean
+  private ScopeService scopeService;
 
   private AuthorizationService authorizationService;
 
   @BeforeEach
   public void setUp() {
-    authorizationService = new AuthorizationService(realmRepository, clientRepository, authRequestRepository);
+    authorizationService = new AuthorizationService(realmRepository, clientRepository, authRequestRepository, scopeService);
     authorizationService.setAuthCodeAesSecretKey(ENCODED_KEY);
   }
 
@@ -34,7 +39,8 @@ class AuthorizationServiceTest {
         "realm1",
         "client1",
         "http://redirect-uri.com",
-        "username1"
+        "username1",
+            Set.of("email", "profile", "email.write")
     );
     String code = authorizationService.encodeAuthorizationCode(authorizationCode);
     System.out.println("Code - " + code);
@@ -48,6 +54,7 @@ class AuthorizationServiceTest {
         authorizationCode.expiresAt().toEpochSecond(ZoneOffset.UTC),
         decodedCode.expiresAt().toEpochSecond(ZoneOffset.UTC)
     );
+    assertEquals(authorizationCode.scopes(), decodedCode.scopes());
   }
 
 }

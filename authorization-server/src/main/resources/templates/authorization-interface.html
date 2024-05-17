@@ -11,24 +11,27 @@
 </head>
 <body>
 <header>
-    My Authorization Server | Signed in as <span style="font-weight: bold" th:text="${user.username}"></span>
+    <span style="font-weight: bold" th:text="${realm.getName()}"></span> | Signed in as <span style="font-weight: bold" th:text="${user.username}"></span>
 </header>
 <main>
-    <h1 th:text="${client.getName()}"></h1>
-    <p th:text="${client.getDescription()}"></p>
-    <p th:text="${client.getHomePageUrl()}"></p>
-    <hr>
-    This app wants to:
-    <ul>
-        <li>
-            View your email
-        </li>
-        <li>
-            View your profile
-        </li>
-    </ul>
-    <button><a th:href="${denyActionURI}">Deny</a></button>
-    <button><a th:href="${allowActionURI}">Allow</a></button>
+    <form th:action="${allowActionURI}" method="post">
+        <h1 th:text="${client.getName()}"></h1>
+        <p th:text="${client.getDescription()}"></p>
+        <p th:text="${client.getHomePageUrl()}"></p>
+        <hr>
+        This app wants to:
+        <ul>
+            <th:template th:each="scope : ${scopes}">
+                <li>
+                    <input th:id="${scope.name()}" type="checkbox" th:value="${scope.name()}" name="selectedScopes" th:disabled="${scope.required()}" checked/>
+                    <label th:for="${scope.name()}"
+                           th:text="${scope.description()}">Scope description</label>
+                </li>
+            </th:template>
+        </ul>
+        <a th:href="${denyActionURI}">Deny</a>
+        <button type="submit">Allow</button>
+    </form>
 </main>
 </body>
 </html>

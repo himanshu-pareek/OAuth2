@@ -29,8 +29,7 @@ http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffW
 http://localhost:9000/realms/first-realm/auth?client_id=17eQlg7kOopLRhyt8VsApffWByW0XsWN&redirect_uri=http://localhost:8081/oauth/callback&response_type=code&scope=email+storage
 
 ### Valid Auth URL
-http://localhost:9000/realms/java/auth?client_id=VDjRbxXHReJKqjX3jVXjsH148faRYFX5&redirect_uri=http://localhost:8081/oauth/callback&response_type=code&scope=email+profile&state=home
+http://localhost:9000/realms/java/auth?client_id=w4xVSjdmoPzd6SdNXDH1eIlppfrCHfGE&redirect_uri=http://localhost:8081/oauth/callback&response_type=code&scope=email openid profile contact.read contact.write
 
-http://localhost:8081/oauth/callback?code=qZyp%2FUBbGVUEOIvDIBhsjj4QYvOGDFssAXp0XJQJfApkX1spHPvXYxjv%2FNshu17rN7A4%2FDnGc9oY1LfmO%2BTkC9mXt3q4eg7Q5DLO5M8M0B0WqFyZEVaAph%2BFSm5jnskS1lgY5m38WGzd78gOlYat0VWWD1tERLHrLXxXmgRt%2BGxf
+http://localhost:8081/oauth/callback?code=7QUBYybCzrqVNvmpTwyTKMNdhuYGN8%2F46C0DoWz7NoRqS9FG21AcpETi6jBAVdZ%2Bwfagsx1Bo4KCEzjuqMHmpA2wUvkIB6OAYYKPS91zWZee3gnS6ZJijZqNTkvy7cwpq3Z26ewMt89fsVEbaEnspka7eJKk%2Bfwrmeq7v14obhZ%2FNk4bcfV7o6Hu6fcbdtrKWgMHxWG4Xphl0dHtPpX1fIjjtCk%3D
 
-http://localhost:8081/oauth/callback?code=MppYnJEX58vnIcHAqATJSQdpTEwXZqBkIGj1dA0yVd%2BVMko1lJy7tz4geoOmiPYXlBIPRvGUh%2FiMQmOr1o2RwzdoPcZ9xno6C%2FzOmp%2Fd3ya0Bbs1o%2FYm5bT8iXP3yYlRla37Bl8PZi1eTansNebbyeZPGtqRfnNrFNyFPH0Pf9re&state=home

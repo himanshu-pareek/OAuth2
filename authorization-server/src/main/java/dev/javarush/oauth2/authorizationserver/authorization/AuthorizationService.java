@@ -4,22 +4,29 @@ import dev.javarush.oauth2.authorizationserver.client.Client;
 import dev.javarush.oauth2.authorizationserver.client.ClientRepository;
 import dev.javarush.oauth2.authorizationserver.realms.Realm;
 import dev.javarush.oauth2.authorizationserver.realms.RealmRepository;
+import dev.javarush.oauth2.authorizationserver.scope.Scope;
+import dev.javarush.oauth2.authorizationserver.scope.ScopeService;
 import dev.javarush.oauth2.authorizationserver.user.User;
 import dev.javarush.oauth2.authorizationserver.util.AESUtil;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthorizationService {
   private final Set<String> VALID_RESPONSE_TYPES = Set.of("code", "token");
-  private final Set<String> AVAILABLE_SCOPES = Set.of("email", "profile");
+  private final Set<Scope> REQUIRED_SCOPES = Set.of(
+          new Scope("", "email", "Application can view your email.", true),
+          new Scope("", "profile", "Application can view your profile.", true),
+          new Scope("", "openid", "Application can see your id.", true)
+  );
 
   @Value("${auth.code.aes.secret.key}")
   private String authCodeAesSecretKey;
@@ -27,14 +34,16 @@ public class AuthorizationService {
   private final RealmRepository realmRepository;
   private final ClientRepository clientRepository;
   private final AuthRequestRepository authRequestRepository;
+  private final ScopeService scopeService;
 
   public AuthorizationService(
-      RealmRepository realmRepository,
-      ClientRepository clientRepository, AuthRequestRepository authRequestRepository
+          RealmRepository realmRepository,
+          ClientRepository clientRepository, AuthRequestRepository authRequestRepository, ScopeService scopeService
   ) {
     this.realmRepository = realmRepository;
     this.clientRepository = clientRepository;
     this.authRequestRepository = authRequestRepository;
+      this.scopeService = scopeService;
   }
 
   public Realm verifyAuthRequest(AuthRequest authRequest) {
@@ -58,13 +67,37 @@ public class AuthorizationService {
           "Scope not present"
       );
     }
-    String[] scopes = authRequest.scope().split(" ");
-    for (String scope : scopes) {
-      if (!AVAILABLE_SCOPES.contains(scope)) {
+    String[] scopesArray = authRequest.scope().split(" ");
+    Set<String> requestedScopes = new HashSet<>(Arrays.asList(scopesArray));
+    validateRequiredScopes (authRequest, requestedScopes);
+    validateOptionalScopes (authRequest, requestedScopes);
+  }
+
+  private void validateOptionalScopes(AuthRequest authRequest, Set<String> requestedScopes) {
+    Collection<String> availableScopes = this.scopeService.getScopesByRealmId(authRequest.realmId())
+            .stream().map(Scope::name)
+            .collect(Collectors.toSet());
+    availableScopes.addAll(REQUIRED_SCOPES.stream().map(Scope::name).collect(Collectors.toSet()));
+    for (String scope: requestedScopes) {
+      if (!availableScopes.contains(scope)) {
         throw new InvalidAuthRequestException(
-            redirectUri,
-            "invalid_scope",
-            "Scope not allowed"
+                authRequest.redirectUri(),
+                "invalid_scope",
+                scope + " is not a valid scope"
+        );
+      }
+    }
+  }
+
+  private void validateRequiredScopes(AuthRequest authRequest, Set<String> scopes) {
+    Set<String> requiredScopes = REQUIRED_SCOPES.stream().map(Scope::name)
+            .collect(Collectors.toSet());
+    for (String scope: requiredScopes) {
+      if (!scopes.contains(scope)) {
+        throw new InvalidAuthRequestException(
+                authRequest.redirectUri(),
+                "invalid_scope",
+                scope + " is required"
         );
       }
     }
@@ -169,10 +202,10 @@ public class AuthorizationService {
     );
   }
 
-  public String allowAuthRequest(AuthRequest authRequest, User user) {
+  public String allowAuthRequest(AuthRequest authRequest, User user, Collection<String> selectedScopes) {
     AuthorizationCode authorizationCode =
         AuthorizationCode.authorizationCode(authRequest.realmId(), authRequest.clientId(),
-            authRequest.redirectUri(), user.getUsername());
+            authRequest.redirectUri(), user.getUsername(), selectedScopes);
     try {
       return encodeAuthorizationCode(authorizationCode);
     } catch (RuntimeException e) {
@@ -220,5 +253,34 @@ public class AuthorizationService {
 
   public void setAuthCodeAesSecretKey(String authCodeAesSecretKey) {
     this.authCodeAesSecretKey = authCodeAesSecretKey;
+  }
+
+  public Collection<Scope> getAllScopes(AuthRequest authRequest) {
+    Set<String> requestedScopes = Arrays.stream(authRequest.scope().split(" ")).collect(Collectors.toSet());
+    Collection<Scope> realmScopes = this.scopeService.getScopesByRealmId(authRequest.realmId());
+    realmScopes.addAll(REQUIRED_SCOPES);
+    return realmScopes.stream().filter(scope -> requestedScopes.contains(scope.name()))
+            .collect(Collectors.toSet());
+  }
+
+  public Collection<String> getSelectedScopes(AuthRequest authRequest, String[] selectedScopes) {
+    Collection<Scope> realmScopes = this.scopeService.getScopesByRealmId(authRequest.realmId());
+    Collection<String> availableScopes = Stream.concat(
+            realmScopes.stream(),
+            REQUIRED_SCOPES.stream()
+    ).map(Scope::name).collect(Collectors.toSet());
+    for (String scope: selectedScopes) {
+      if (!availableScopes.contains(scope)) {
+        throw new InvalidAuthRequestException(
+                authRequest.redirectUri(),
+                "invalid_scope",
+                "scope " + scope + " is not a valid scope"
+        );
+      }
+    }
+    return Stream.concat(
+            REQUIRED_SCOPES.stream().map(Scope::name),
+            Arrays.stream(selectedScopes)
+    ).collect(Collectors.toSet());
   }
 }
