@@ -35,11 +35,6 @@ CREATE TABLE IF NOT EXISTS realm_scopes (
 );
 
 DELETE FROM realm_scopes;
-
-INSERT INTO realm_scopes (realm_id, name, description)
-    VALUES ('java', 'email.read', 'Read emails in your inbox.'),
-    ('java', 'email.write', 'Write emails on behalf of you.'),
-    ('java', 'contact.read', 'Read your contacts.'),
-    ('java', 'contact.write', 'Edit your contacts'),
-    ('rush', 'post.read', 'Read posts on your timeline.'),
-    ('rush', 'post.write', 'Write posts on behalf of you.');
+DELETE FROM client_secrets;
+DELETE FROM clients;
+DELETE FROM realms;
