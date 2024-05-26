@@ -33,8 +33,3 @@ CREATE TABLE IF NOT EXISTS realm_scopes (
     PRIMARY KEY (realm_id, name),
     FOREIGN KEY (realm_id) REFERENCES realms(id)
 );
-
-DELETE FROM realm_scopes;
-DELETE FROM client_secrets;
-DELETE FROM clients;
-DELETE FROM realms;
