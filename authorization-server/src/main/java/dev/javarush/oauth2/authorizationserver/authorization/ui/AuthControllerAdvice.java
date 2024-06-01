@@ -12,7 +12,7 @@ public class AuthControllerAdvice {
   @ExceptionHandler(InvalidAuthRequestException.class)
   public ModelAndView handleInvalidAuthRequest(InvalidAuthRequestException ex, Model model) {
     if (ex.getRedirectUri() != null) {
-      model.addAttribute("error_code", ex.getErrorCode());
+      model.addAttribute("error", ex.getErrorCode());
       model.addAttribute("error_description", ex.getErrorDescription());
       return new ModelAndView("redirect:" + ex.getRedirectUri(), model.asMap());
     }

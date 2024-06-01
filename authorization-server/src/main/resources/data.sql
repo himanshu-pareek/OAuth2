@@ -16,8 +16,8 @@ INSERT INTO `realm_scopes` VALUES
 
 -- Insert clients
 INSERT INTO `clients` VALUES
-    ('kxOFV4HF3ENLFYhglcboZawUzhi5ceG4','java',1,'Trip','','','This is trips app','','http://localhost:8081/oauth/callback','',''),
-    ('YoPg4yWFCEDNbhIsQnfUEZz9KKT5FFlf','rush',0,'Shopping App','','','This is shopping app','','http://localhost:5001/oauth/callback','','http://localhost:5001');
+    ('kxOFV4HF3ENLFYhglcboZawUzhi5ceG4','java',1,'Trip','','','This is trips app','','http://localhost:8081/oauth/callback,http://127.0.0.1:8081/oauth/callback','',''),
+    ('YoPg4yWFCEDNbhIsQnfUEZz9KKT5FFlf','rush',0,'Shopping App','','','This is shopping app','','http://localhost:5001/oauth/callback,http://127.0.0.1:5001/oauth/callback','','http://localhost:5001');
 
 -- Insert client secrets
 INSERT INTO `client_secrets` VALUES (2,'kxOFV4HF3ENLFYhglcboZawUzhi5ceG4','jQp0Sgrr8L+LK48r2Syjw/J+ve/v2QppQbjCjftBlBtgv2T7EnflqLfB65Mv7VnuYInhCygFOJdVSNpmiWEyhA==','j+vrGM/PO0CpbSSJk5GQaWQDj19PsPRJg9lTXO30g0I=');

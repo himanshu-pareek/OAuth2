@@ -78,12 +78,11 @@ public class OAuth2ClientController {
   public RedirectView login(
       HttpServletRequest request
   ) {
-    System.out.println(authorizationEndpoint);
     String state = Utils.generateRandomString(16);
     request.getSession().setAttribute("state", state);
     request.getSession().removeAttribute("access_token");
     String authorizationUrl = String.format(
-        "%s?client_id=%s&response_type=code&state=%s&redirect_uri=%s",
+        "%s?client_id=%s&response_type=code&state=%s&redirect_uri=%s&scope=email profile openid contact.read contact.write",
         authorizationEndpoint,
         clientId,
         state,
@@ -95,7 +94,7 @@ public class OAuth2ClientController {
     return redirectView;
   }
 
-  @GetMapping("authorization-code/callback")
+  @GetMapping("oauth/callback")
   public String authCallback(
       @RequestParam Map<String, String> query,
       HttpServletRequest request,
@@ -107,6 +106,7 @@ public class OAuth2ClientController {
       model.addAttribute("error", "Something went wrong. Try again.");
       return "index";
     }
+
 
     if (state == null || !state.equals(request.getSession().getAttribute("state"))) {
       model.addAttribute("error", "State does not match. Try again.");
