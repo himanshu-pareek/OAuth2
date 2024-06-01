@@ -2,6 +2,9 @@ package dev.javarush.oauth2.authorizationserver.client;
 
 import dev.javarush.oauth2.authorizationserver.util.Strings;
 import java.util.Base64;
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -63,5 +66,19 @@ public class ClientService {
 
   public void deleteClientSecret(Integer secretId) {
     this.clientSecretRepository.deleteById(secretId);
+  }
+
+  public void validateClientSecret(String clientId, String clientSecret) {
+    Stream<ClientSecret> availableSecrets = this.clientSecretRepository.findByClientId(clientId);
+    boolean matched = availableSecrets.anyMatch(secret -> this.matchSecret(clientSecret, secret));
+  }
+
+  private boolean matchSecret (
+          String plainSecret,
+          ClientSecret secret
+  ) {
+    byte[] salt = Base64.getDecoder().decode(secret.getSalt());
+    String hashSecret = Strings.hash(plainSecret, salt);
+    return hashSecret.equals(secret.getSecret());
   }
 }
