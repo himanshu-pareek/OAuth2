@@ -113,6 +113,8 @@ public class OAuth2ClientController {
       return "index";
     }
 
+    System.out.println("Authorization code = " + code);
+
     // Get Access Token
     String accessTokenUrl = String.format(
         "%s?grant_type=code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",

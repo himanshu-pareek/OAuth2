@@ -233,7 +233,7 @@ public class AuthorizationService {
     try {
       SecretKey secretKey = AESUtil.generateKey(authCodeAesSecretKey);
       byte[] encryptedCodeBytes = AESUtil.encrypt(secretKey, codeBytes, ivParameterSpec);
-      return Base64.getEncoder().encodeToString(encryptedCodeBytes);
+      return Base64.getUrlEncoder().encodeToString(encryptedCodeBytes);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -241,7 +241,7 @@ public class AuthorizationService {
 
   private String decryptCode (String encryptedCode) {
     IvParameterSpec ivParameterSpec = new IvParameterSpec(new byte[16]);
-    byte[] encryptedCodeBytes = Base64.getDecoder().decode(encryptedCode);
+    byte[] encryptedCodeBytes = Base64.getUrlDecoder().decode(encryptedCode);
     try {
       SecretKey secretKey = AESUtil.generateKey(authCodeAesSecretKey);
       byte[] codeBytes = AESUtil.decrypt(secretKey, encryptedCodeBytes, ivParameterSpec);

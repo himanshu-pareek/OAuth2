@@ -68,9 +68,14 @@ public class ClientService {
     this.clientSecretRepository.deleteById(secretId);
   }
 
-  public void validateClientSecret(String clientId, String clientSecret) {
-    Stream<ClientSecret> availableSecrets = this.clientSecretRepository.findByClientId(clientId);
-    boolean matched = availableSecrets.anyMatch(secret -> this.matchSecret(clientSecret, secret));
+  public boolean validateClientSecret(String clientId, String clientSecret) {
+    Iterable<ClientSecret> availableSecrets = this.clientSecretRepository.findByClientId(clientId);
+    for (ClientSecret secret: availableSecrets) {
+      if (this.matchSecret(clientSecret, secret)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private boolean matchSecret (

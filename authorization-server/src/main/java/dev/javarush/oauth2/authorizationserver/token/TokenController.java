@@ -1,5 +1,6 @@
 package dev.javarush.oauth2.authorizationserver.token;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -15,6 +16,7 @@ public class TokenController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.OK)
     public void handleRequest (
             @PathVariable("realmId") String realmId,
             @RequestParam Map<String, String> query
@@ -28,5 +30,8 @@ public class TokenController {
                 query.get("redirect_uri")
         );
         this.tokenService.verifyTokenRequest (tokenRequest);
+
+        // Now is the hard part - Create access_token and send it
+
     }
 }
