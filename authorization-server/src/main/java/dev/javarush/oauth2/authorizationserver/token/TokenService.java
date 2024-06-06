@@ -32,7 +32,6 @@ public class TokenService {
     }
 
     private void verifyCode(TokenRequest tokenRequest) {
-        String redirectUri = tokenRequest.redirectUri();
         String code = tokenRequest.code();
         if (!StringUtils.hasText(code)) {
             throw new InvalidTokenRequestException("code is required");
@@ -123,6 +122,6 @@ public class TokenService {
     }
 
     private String generateAccessToken (TokenRequest tokenRequest) {
-        
+        return null;
     }
 }
