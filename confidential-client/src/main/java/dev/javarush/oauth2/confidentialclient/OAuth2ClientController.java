@@ -53,23 +53,25 @@ public class OAuth2ClientController {
     }
     String accessToken = (String) accessTokenObj;
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    headers.put("Authorization", Collections.singletonList(String.format(
-        "Bearer %s",
-        accessToken
-    )));
+    model.addAttribute("accessToken", accessToken);
 
-    Map<String, Object> user = template.exchange(
-        userEndpoint,
-        HttpMethod.GET,
-        new HttpEntity<>(
-            null,
-            headers
-        ),
-        Map.class
-    ).getBody();
-    model.addAttribute("user", user);
+//    HttpHeaders headers = new HttpHeaders();
+//    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+//    headers.put("Authorization", Collections.singletonList(String.format(
+//        "Bearer %s",
+//        accessToken
+//    )));
+//
+//    Map<String, Object> user = template.exchange(
+//        userEndpoint,
+//        HttpMethod.GET,
+//        new HttpEntity<>(
+//            null,
+//            headers
+//        ),
+//        Map.class
+//    ).getBody();
+//    model.addAttribute("user", user);
 
     return "index";
   }
@@ -78,12 +80,11 @@ public class OAuth2ClientController {
   public RedirectView login(
       HttpServletRequest request
   ) {
-    System.out.println(authorizationEndpoint);
     String state = Utils.generateRandomString(16);
     request.getSession().setAttribute("state", state);
     request.getSession().removeAttribute("access_token");
     String authorizationUrl = String.format(
-        "%s?client_id=%s&response_type=code&state=%s&redirect_uri=%s",
+        "%s?client_id=%s&response_type=code&state=%s&redirect_uri=%s&scope=email profile openid contact.read contact.write",
         authorizationEndpoint,
         clientId,
         state,
@@ -95,7 +96,7 @@ public class OAuth2ClientController {
     return redirectView;
   }
 
-  @GetMapping("authorization-code/callback")
+  @GetMapping("oauth/callback")
   public String authCallback(
       @RequestParam Map<String, String> query,
       HttpServletRequest request,
@@ -108,14 +109,17 @@ public class OAuth2ClientController {
       return "index";
     }
 
+
     if (state == null || !state.equals(request.getSession().getAttribute("state"))) {
       model.addAttribute("error", "State does not match. Try again.");
       return "index";
     }
 
+    System.out.println("Authorization code = " + code);
+
     // Get Access Token
     String accessTokenUrl = String.format(
-        "%s?grant_type=code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
+        "%s?grant_type=authorization_code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
         tokenEndpoint,
         code,
         redirectUri,

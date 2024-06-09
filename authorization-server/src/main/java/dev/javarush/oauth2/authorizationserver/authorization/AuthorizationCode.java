@@ -29,7 +29,7 @@ public record AuthorizationCode(
         redirectURI,
         username,
         scopes,
-        LocalDateTime.now().plusSeconds(30),
+        LocalDateTime.now().plusMinutes(10),
         Strings.generateRandomString(32)
     );
   }

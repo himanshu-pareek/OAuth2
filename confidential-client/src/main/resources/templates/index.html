@@ -8,7 +8,7 @@
     <div th:if="${error}" th:text="${error}" style="color: darkred"></div>
     <div th:if="${user == null}">
         <a href="/login">
-            Connect your github account
+            Connect your account
         </a>
     </div>
     <div th:if="${user != null}">
@@ -21,6 +21,13 @@
         <p>
             <span>Bio: </span><span th:text="${user.get('bio')}"></span>
         </p>
+    </div>
+    <div th:if="${accessToken != null}">
+        <pre>
+            <code th:text="${accessToken}">
+
+            </code>
+        </pre>
     </div>
 </body>
 </html>

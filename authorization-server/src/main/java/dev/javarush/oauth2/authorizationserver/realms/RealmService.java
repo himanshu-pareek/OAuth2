@@ -1,15 +1,18 @@
 package dev.javarush.oauth2.authorizationserver.realms;
 
+import dev.javarush.oauth2.authorizationserver.crypto.KeyPairRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RealmService {
 
   private final RealmRepository repository;
+  private final KeyPairRepository keyPairRepository;
 
 
-  public RealmService(RealmRepository repository) {
+  public RealmService(RealmRepository repository, KeyPairRepository keyPairRepository) {
     this.repository = repository;
+      this.keyPairRepository = keyPairRepository;
   }
 
   public Realm createRealm(String realmName) {
@@ -19,7 +22,9 @@ public class RealmService {
     }
     Realm realm = new Realm(realmId, realmName);
     realm.setCreate(true);
-    return this.repository.save(realm);
+    Realm savedRealm = this.repository.save(realm);
+    this.keyPairRepository.generateKeysForRealm(realm.getId());
+    return savedRealm;
   }
 
   public Realm getRealm(String id) {

@@ -33,3 +33,19 @@ CREATE TABLE IF NOT EXISTS realm_scopes (
     PRIMARY KEY (realm_id, name),
     FOREIGN KEY (realm_id) REFERENCES realms(id)
 );
+
+CREATE TABLE IF NOT EXISTS realm_keys (
+    realm_id VARCHAR(20) NOT NULL PRIMARY KEY,
+    private_key TEXT NOT NULL,
+    public_key TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id VARCHAR(40) NOT NULL PRIMARY KEY,
+    issuer TEXT,
+    audience VARCHAR(40),
+    subject VARCHAR (20),
+    client_id CHAR (32),
+    scopes TEXT,
+    expires_at INTEGER
+);
