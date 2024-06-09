@@ -53,23 +53,25 @@ public class OAuth2ClientController {
     }
     String accessToken = (String) accessTokenObj;
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    headers.put("Authorization", Collections.singletonList(String.format(
-        "Bearer %s",
-        accessToken
-    )));
+    model.addAttribute("accessToken", accessToken);
 
-    Map<String, Object> user = template.exchange(
-        userEndpoint,
-        HttpMethod.GET,
-        new HttpEntity<>(
-            null,
-            headers
-        ),
-        Map.class
-    ).getBody();
-    model.addAttribute("user", user);
+//    HttpHeaders headers = new HttpHeaders();
+//    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+//    headers.put("Authorization", Collections.singletonList(String.format(
+//        "Bearer %s",
+//        accessToken
+//    )));
+//
+//    Map<String, Object> user = template.exchange(
+//        userEndpoint,
+//        HttpMethod.GET,
+//        new HttpEntity<>(
+//            null,
+//            headers
+//        ),
+//        Map.class
+//    ).getBody();
+//    model.addAttribute("user", user);
 
     return "index";
   }
@@ -117,7 +119,7 @@ public class OAuth2ClientController {
 
     // Get Access Token
     String accessTokenUrl = String.format(
-        "%s?grant_type=code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
+        "%s?grant_type=authorization_code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
         tokenEndpoint,
         code,
         redirectUri,

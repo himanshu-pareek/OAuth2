@@ -22,5 +22,12 @@
             <span>Bio: </span><span th:text="${user.get('bio')}"></span>
         </p>
     </div>
+    <div th:if="${accessToken != null}">
+        <pre>
+            <code th:text="${accessToken}">
+
+            </code>
+        </pre>
+    </div>
 </body>
 </html>

@@ -1,27 +1,47 @@
 package dev.javarush.oauth2.authorizationserver.token;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.javarush.oauth2.authorizationserver.authorization.AuthorizationCode;
 import dev.javarush.oauth2.authorizationserver.authorization.AuthorizationService;
 import dev.javarush.oauth2.authorizationserver.client.Client;
 import dev.javarush.oauth2.authorizationserver.client.ClientService;
+import dev.javarush.oauth2.authorizationserver.crypto.JWTSigner;
+import dev.javarush.oauth2.authorizationserver.crypto.KeyPairRepository;
 import dev.javarush.oauth2.authorizationserver.realms.Realm;
 import dev.javarush.oauth2.authorizationserver.realms.RealmService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SignatureException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Map;
 
 @Service
 public class TokenService {
 
+    private static Logger logger = LoggerFactory.getLogger(TokenService.class);
+
     private final RealmService realmService;
     private final ClientService clientService;
     private final AuthorizationService authorizationService;
+    private final KeyPairRepository keyPairRepository;
+    private final TokenRepository tokenRepository;
 
-    public TokenService(RealmService realmService, ClientService clientService, AuthorizationService authorizationService) {
+    public TokenService(RealmService realmService, ClientService clientService, AuthorizationService authorizationService, KeyPairRepository keyPairRepository, TokenRepository tokenRepository) {
         this.realmService = realmService;
         this.clientService = clientService;
         this.authorizationService = authorizationService;
+        this.keyPairRepository = keyPairRepository;
+        this.tokenRepository = tokenRepository;
     }
 
     public void verifyTokenRequest(TokenRequest tokenRequest) {
@@ -121,7 +141,39 @@ public class TokenService {
         }
     }
 
-    private String generateAccessToken (TokenRequest tokenRequest) {
-        return null;
+    private String encodeAccessToken (AccessToken accessToken, String realmId) {
+        PrivateKey privateKey = keyPairRepository.getPrivateKey(realmId);
+        try {
+            return new JWTSigner().sign(accessToken, privateKey);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | JsonProcessingException | SignatureException e) {
+            logger.error("Error while encoding access token: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Map<String, Object> generateAccessTokenResponse (String refreshToken, AccessToken accessToken, String realmId) {
+        String accessTokenEncoded = encodeAccessToken(accessToken, realmId);
+        long expiresIn = accessToken.expiresAt() - accessToken.issuedAt();
+        long refreshTokenExpiresIn = 24 * 60 * 60;
+        return Map.of(
+                "access_token", accessTokenEncoded,
+                "expires_in", expiresIn,
+                "token_type", "Bearer",
+                "refresh_token", refreshToken,
+                "refresh_token_expires_in", refreshTokenExpiresIn
+        );
+    }
+
+    public Map<String, Object> generateAccessTokenResponse (TokenRequest tokenRequest) {
+        var authorizationCode = this.authorizationService.decodeAuthorizationCode(tokenRequest.code());
+        AccessToken accessToken = AccessToken.accessToken(
+                "http://localhost:9000" + "/realms/" + authorizationCode.realmId(),
+                "api://default",
+                authorizationCode.username(),
+                authorizationCode.clientId(),
+                authorizationCode.scopes()
+        );
+        String refreshToken = this.tokenRepository.saveAccessToken(accessToken);
+        return generateAccessTokenResponse(refreshToken, accessToken, authorizationCode.realmId());
     }
 }

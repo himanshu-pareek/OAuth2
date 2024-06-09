@@ -1,9 +1,12 @@
 package dev.javarush.oauth2.authorizationserver.token;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("realms/{realmId}/token")
@@ -17,9 +20,10 @@ public class TokenController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public void handleRequest (
+    public Map<String, Object> handleRequest (
             @PathVariable("realmId") String realmId,
-            @RequestParam Map<String, String> query
+            @RequestParam Map<String, String> query,
+            HttpServletResponse response
     ) {
         var tokenRequest = new TokenRequest(
                 realmId,
@@ -31,7 +35,8 @@ public class TokenController {
         );
         this.tokenService.verifyTokenRequest (tokenRequest);
 
-        // Now is the hard part - Create access_token and send it
-
+        // Set the header
+        response.setHeader("Cache-Control", "no-store");
+        return this.tokenService.generateAccessTokenResponse(tokenRequest);
     }
 }

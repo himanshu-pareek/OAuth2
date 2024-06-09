@@ -39,3 +39,13 @@ CREATE TABLE IF NOT EXISTS realm_keys (
     private_key TEXT NOT NULL,
     public_key TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id VARCHAR(40) NOT NULL PRIMARY KEY,
+    issuer TEXT,
+    audience VARCHAR(40),
+    subject VARCHAR (20),
+    client_id CHAR (32),
+    scopes TEXT,
+    expires_at INTEGER
+);
