@@ -11,18 +11,17 @@ import dev.javarush.oauth2.authorizationserver.realms.Realm;
 import dev.javarush.oauth2.authorizationserver.realms.RealmService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -175,5 +174,14 @@ public class TokenService {
         );
         String refreshToken = this.tokenRepository.saveAccessToken(accessToken);
         return generateAccessTokenResponse(refreshToken, accessToken, authorizationCode.realmId());
+    }
+
+    public List<String> getAllowedOrigins(String realmId) {
+        List<String> origins = new ArrayList<>();
+        this.clientService.getAll(realmId).forEach(client -> {
+            String[] allowedOrigins = client.getWebOrigins().split(",");
+            Collections.addAll(origins, allowedOrigins);
+        });
+        return origins;
     }
 }

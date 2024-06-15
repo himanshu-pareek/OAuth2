@@ -30,7 +30,7 @@ public class ClientService {
     return this.clientRepository.save(client);
   }
 
-  Iterable<Client> getAll(String realmId) {
+  public Iterable<Client> getAll(String realmId) {
     return this.clientRepository.findAllByRealmId(realmId);
   }
 
