@@ -55,23 +55,23 @@ public class OAuth2ClientController {
 
     model.addAttribute("accessToken", accessToken);
 
-//    HttpHeaders headers = new HttpHeaders();
-//    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-//    headers.put("Authorization", Collections.singletonList(String.format(
-//        "Bearer %s",
-//        accessToken
-//    )));
-//
-//    Map<String, Object> user = template.exchange(
-//        userEndpoint,
-//        HttpMethod.GET,
-//        new HttpEntity<>(
-//            null,
-//            headers
-//        ),
-//        Map.class
-//    ).getBody();
-//    model.addAttribute("user", user);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Collections.singletonList(MediaType.TEXT_PLAIN));
+    headers.put("Authorization", Collections.singletonList(String.format(
+        "Bearer %s",
+        accessToken
+    )));
+
+    String message = template.exchange(
+        userEndpoint,
+        HttpMethod.GET,
+        new HttpEntity<>(
+            null,
+            headers
+        ),
+        String.class
+    ).getBody();
+    model.addAttribute("message", message);
 
     return "index";
   }

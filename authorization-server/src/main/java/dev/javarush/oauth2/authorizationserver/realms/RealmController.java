@@ -1,5 +1,6 @@
 package dev.javarush.oauth2.authorizationserver.realms;
 
+import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,4 +35,10 @@ public class RealmController {
     return this.service.getRealm(id);
   }
 
+  @GetMapping("{id}/jwk")
+  public Map<String, Object> jwks (
+          @PathVariable("id") String id
+  ) {
+    return this.service.getPublicKey(id);
+  }
 }
