@@ -10,4 +10,3 @@ Learn OAuth2 from scratch - no libraries (apart from the general web libraries) 
 
 [Click here](https://youtube.com/playlist?list=PLbk-lC-jmHejz7ZTfOqFyXH15yt6b3WHe&si=OJmAdDaUFv2MB00s) to watch it on youtube
 
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/videoseries?si=OJmAdDaUFv2MB00s&amp;list=PLbk-lC-jmHejz7ZTfOqFyXH15yt6b3WHe" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
