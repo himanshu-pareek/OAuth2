@@ -269,6 +269,9 @@ public class AuthorizationService {
             realmScopes.stream(),
             REQUIRED_SCOPES.stream()
     ).map(Scope::name).collect(Collectors.toSet());
+    if (selectedScopes == null) {
+      selectedScopes = new String[] {};
+    }
     for (String scope: selectedScopes) {
       if (!availableScopes.contains(scope)) {
         throw new InvalidAuthRequestException(
