@@ -3,6 +3,8 @@ package dev.javarush.oauth2.resource_server.contact;
 import dev.javarush.oauth2.resource_server.crypto.CryptoRepository;
 import dev.javarush.oauth2.resource_server.crypto.InvalidJWTException;
 import dev.javarush.oauth2.resource_server.crypto.JWTVerifier;
+import dev.javarush.oauth2.resource_server.security.SecurityException;
+import dev.javarush.oauth2.resource_server.security.UserContextHolder;
 import dev.javarush.oauth2.resource_server.token.AccessToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -119,7 +121,7 @@ class ContactWriteFilter extends HttpFilter {
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         // 1. Check whether to apply the filter or not
-        if (!request.getMethod().equals(RequestMethod.POST.name())) {
+        if (!request.getMethod().equals(RequestMethod.POST.name()) && !request.getMethod().equals(RequestMethod.PUT.name())) {
             chain.doFilter(request, response);
             return;
         }
@@ -207,6 +209,8 @@ class AccessTokenFilterHelper {
             );
             return false;
         }
+        String userId = accessToken.subject();
+        UserContextHolder.setUserId(userId);
         return true;
     }
 
