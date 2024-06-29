@@ -3,6 +3,8 @@ package dev.javarush.oauth2.authorizationserver.realms;
 import dev.javarush.oauth2.authorizationserver.crypto.KeyPairRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class RealmService {
 
@@ -41,5 +43,14 @@ public class RealmService {
       words[i] = words[i].toLowerCase();
     }
     return String.join("-", words);
+  }
+
+  public Map<String, Object> getPublicKey(String id) {
+    String publicKeyString = keyPairRepository.getPublicKeyString(id);
+    return Map.of(
+            "typ", "JWT",
+            "alg", "RS256",
+            "key", publicKeyString
+    );
   }
 }

@@ -2,8 +2,10 @@ package dev.javarush.oauth2.confidentialclient;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,8 +35,8 @@ public class OAuth2ClientController {
   @Value("${oauth2.client.secret}")
   private String clientSecret;
 
-  @Value("${oauth2.auth-server.user-endpoint}")
-  private String userEndpoint;
+  @Value("${oauth2.resource-server.contacts-endpoint}")
+  private String contactsEndpoint;
 
   private final RestTemplate template;
 
@@ -55,23 +57,24 @@ public class OAuth2ClientController {
 
     model.addAttribute("accessToken", accessToken);
 
-//    HttpHeaders headers = new HttpHeaders();
-//    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-//    headers.put("Authorization", Collections.singletonList(String.format(
-//        "Bearer %s",
-//        accessToken
-//    )));
-//
-//    Map<String, Object> user = template.exchange(
-//        userEndpoint,
-//        HttpMethod.GET,
-//        new HttpEntity<>(
-//            null,
-//            headers
-//        ),
-//        Map.class
-//    ).getBody();
-//    model.addAttribute("user", user);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    headers.put("Authorization", Collections.singletonList(String.format(
+        "Bearer %s",
+        accessToken
+    )));
+
+    List<Map<String, Object>> contacts = template.exchange(
+            contactsEndpoint,
+            HttpMethod.GET,
+            new HttpEntity<>(
+                    null,
+                    headers
+            ),
+            new ParameterizedTypeReference<List<Map<String, Object>>>() {
+            }
+    ).getBody();
+    model.addAttribute("contacts", contacts);
 
     return "index";
   }
