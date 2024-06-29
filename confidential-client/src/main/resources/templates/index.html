@@ -22,15 +22,16 @@
             <span>Bio: </span><span th:text="${user.get('bio')}"></span>
         </p>
     </div>
-    <div th:if="${accessToken != null}">
-        <pre>
-            <code th:text="${accessToken}">
-
-            </code>
-        </pre>
-    </div>
     <div th:if="${message}" th:text="${message}">
 
+    </div>
+    <div th:if="${contacts}">
+        <ul>
+            <li th:each="contact: ${contacts}">
+                <div th:text="${contact.get('name')}">NAME</div>
+                <div th:text="${contact.get('email')}">EMAIL</div>
+            </li>
+        </ul>
     </div>
 </body>
 </html>
