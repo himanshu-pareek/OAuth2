@@ -41,7 +41,7 @@ public class ContactController {
             throw new AccessDeniedException(
                     "access_denied",
                     "You can not access contact with id " + existing.get().id(),
-                    List.of("contact.write")
+                    List.of("contact.read")
             );
         }
         return existing.get();
@@ -71,7 +71,7 @@ public class ContactController {
                 .orElseThrow(() -> new AccessDeniedException(
                         "access_denied",
                         "You can not update contact with id " + id,
-                        List.of("contact.write")
+                        List.of("contact.read", "contact.write")
                 ));
 
         var updated = new Contact(id, currentUserId, contact.name(), contact.email());

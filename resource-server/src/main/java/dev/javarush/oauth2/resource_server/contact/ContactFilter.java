@@ -3,7 +3,6 @@ package dev.javarush.oauth2.resource_server.contact;
 import dev.javarush.oauth2.resource_server.crypto.CryptoRepository;
 import dev.javarush.oauth2.resource_server.crypto.InvalidJWTException;
 import dev.javarush.oauth2.resource_server.crypto.JWTVerifier;
-import dev.javarush.oauth2.resource_server.security.SecurityException;
 import dev.javarush.oauth2.resource_server.security.UserContextHolder;
 import dev.javarush.oauth2.resource_server.token.AccessToken;
 import jakarta.servlet.FilterChain;
@@ -19,6 +18,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 @Component
 public class ContactFilter implements ApplicationContextAware {
@@ -57,7 +58,7 @@ public class ContactFilter implements ApplicationContextAware {
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 }
@@ -65,6 +66,10 @@ public class ContactFilter implements ApplicationContextAware {
 class ContactReadFilter extends HttpFilter {
     private static final Logger log = LoggerFactory.getLogger(ContactReadFilter.class);
     private static final Set<String> requiredScopes = Set.of("contact.read");
+    private static final Set<String> consideredMethods = Set.of(
+            RequestMethod.GET.name()
+    );
+
     private final ApplicationContext applicationContext;
     private final AccessTokenFilterHelper helper;
 
@@ -72,7 +77,8 @@ class ContactReadFilter extends HttpFilter {
         this.applicationContext = applicationContext;
         this.helper = new AccessTokenFilterHelper(
                 new HashSet<>(requiredScopes),
-                this::getCryptoRepository
+                this::getCryptoRepository,
+                this::getRealm
         );
     }
 
@@ -80,10 +86,14 @@ class ContactReadFilter extends HttpFilter {
         return this.applicationContext.getBean(CryptoRepository.class);
     }
 
+    private String getRealm() {
+        return this.applicationContext.getEnvironment().getProperty("oauth2.auth-server.realm-id");
+    }
+
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         // 1. Check whether to apply the filter or not
-        if (!request.getMethod().equals(RequestMethod.GET.name())) {
+        if (!consideredMethods.contains(request.getMethod())) {
             chain.doFilter(request, response);
             return;
         }
@@ -103,6 +113,11 @@ class ContactReadFilter extends HttpFilter {
 class ContactWriteFilter extends HttpFilter {
     private static final Logger log = LoggerFactory.getLogger(ContactWriteFilter.class);
     private static final Set<String> requiredScopes = Set.of("contact.read", "contact.write");
+    private static final Set<String> consideredMethods = Set.of(
+            RequestMethod.POST.name(),
+            RequestMethod.PUT.name(),
+            RequestMethod.DELETE.name()
+    );
     private final ApplicationContext applicationContext;
     private final AccessTokenFilterHelper helper;
 
@@ -110,7 +125,8 @@ class ContactWriteFilter extends HttpFilter {
         this.applicationContext = applicationContext;
         this.helper = new AccessTokenFilterHelper(
                 new HashSet<>(requiredScopes),
-                this::getCryptoRepository
+                this::getCryptoRepository,
+                this::getRealm
         );
     }
 
@@ -118,10 +134,14 @@ class ContactWriteFilter extends HttpFilter {
         return this.applicationContext.getBean(CryptoRepository.class);
     }
 
+    private String getRealm() {
+        return this.applicationContext.getEnvironment().getProperty("oauth2.auth-server.realm-id");
+    }
+
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         // 1. Check whether to apply the filter or not
-        if (!request.getMethod().equals(RequestMethod.POST.name()) && !request.getMethod().equals(RequestMethod.PUT.name())) {
+        if (!consideredMethods.contains(request.getMethod())) {
             chain.doFilter(request, response);
             return;
         }
@@ -138,21 +158,20 @@ class ContactWriteFilter extends HttpFilter {
     }
 }
 
-@FunctionalInterface
-interface CryptoRepositoryRetriever {
-
-    CryptoRepository getRepository();
-
-}
-
 class AccessTokenFilterHelper {
 
     private final Collection<String> requiredScopes;
-    private final CryptoRepositoryRetriever cryptoRepositoryRetriever;
+    private final Supplier<CryptoRepository> cryptoRepositorySupplier;
+    private final Supplier<String> realmSupplier;
 
-    AccessTokenFilterHelper(Collection<String> requiredScopes, CryptoRepositoryRetriever cryptoRepositoryRetriever) {
+    AccessTokenFilterHelper(
+            Collection<String> requiredScopes,
+            Supplier<CryptoRepository> cryptoRepositorySupplier,
+            Supplier<String> realmSupplier
+    ) {
         this.requiredScopes = requiredScopes;
-        this.cryptoRepositoryRetriever = cryptoRepositoryRetriever;
+        this.cryptoRepositorySupplier = cryptoRepositorySupplier;
+        this.realmSupplier = realmSupplier;
     }
 
     boolean validate (HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -172,7 +191,7 @@ class AccessTokenFilterHelper {
         AccessToken accessToken;
         try {
             accessToken = new JWTVerifier<>(jwtAccessToken, AccessToken.class)
-                    .verify(this.cryptoRepositoryRetriever.getRepository().getPublicKeyEntry())
+                    .verify(this.cryptoRepositorySupplier.get().getPublicKeyEntry())
                     .getToken();
         } catch (InvalidJWTException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
             errorResponse(
@@ -190,13 +209,13 @@ class AccessTokenFilterHelper {
             errorResponse(
                     response,
                     HttpServletResponse.SC_UNAUTHORIZED,
-                    "invalid_token",
+                    "token_expired",
                     "The access token is expired"
             );
             return false;
         }
 
-        HashSet<String> availableScopes = new HashSet<>(Arrays.asList(accessToken.scopes().split(" ")));
+        Set<String> availableScopes = new HashSet<>(Arrays.asList(accessToken.scopes().split(" ")));
         boolean allAvailable = availableScopes.containsAll(requiredScopes);
         if (!allAvailable) {
             // Scopes are missing
@@ -221,10 +240,11 @@ class AccessTokenFilterHelper {
             String errorDescription
     ) throws IOException {
         response.setStatus(status);
-        response.addHeader("WWW-Authenticate", "Bearer realm=\"java\"");
-        response.addHeader("WWW-Authenticate", "scope=\"" + String.join(" ", requiredScopes) + "\"");
-        response.addHeader("WWW-Authenticate", "error=\"" + error + "\"");
-        response.addHeader("WWW-Authenticate", "error_description=\"" + errorDescription + "\"");
+        String wwwAuthenticate = "Bearer realm=\"" + realmSupplier.get() + "\"; ";
+        wwwAuthenticate += "scope=\"" + String.join(" ", requiredScopes) + "\"; ";
+        wwwAuthenticate += "error=\"" + error + "\"; ";
+        wwwAuthenticate += "error_description=\"" + errorDescription + "\"";
+        response.setHeader("WWW-Authenticate", wwwAuthenticate);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write("{\"error\":\"" + error + "\", \"error_description\": \"" + errorDescription + "\"}\n");

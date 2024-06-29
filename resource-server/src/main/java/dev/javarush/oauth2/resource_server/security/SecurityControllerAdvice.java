@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-@ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SecurityControllerAdvice {
 
