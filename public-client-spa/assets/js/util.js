@@ -1,19 +1,60 @@
 import { AUTHORIZE_ENDPOINT, CLIENT_ID, REDIRECT_URI_SUFFIX, TOKEN_ENDPOINT } from "./constants.js";
 
 const DEFAULT_LAKE = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const SCOPES = 'openid email profile contact.read contact.write';
 
-export const generateAuthorizationUrl = () => {
+export const generateAuthorizationUrl = async () => {
   const redirectUri = window.location.origin + REDIRECT_URI_SUFFIX;
-  const state = generateRandomString (16);
+  const state = generateRandomString(16);
   localStorage.clear();
   localStorage.setItem('state', state);
 
-  return `${AUTHORIZE_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code&state=${state}&redirect_uri=${redirectUri}&scope=openid email profile`;
+  // Proof Kye for Code Exchange (PKCE)
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await computeCodeChallange(codeVerifier);
+  localStorage.setItem('code_verifier', codeVerifier);
+
+  return `${AUTHORIZE_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code` +
+    `&state=${state}&redirect_uri=${redirectUri}&scope=${SCOPES}` +
+    `&code_challenge=${codeChallenge}` +
+    `&code_challenge_method=S256`;
 };
 
 export const generateAccessTokenUrl = () => {
   return TOKEN_ENDPOINT;
 }
+
+const computeCodeChallange = async (codeVerifier = "abcd") => {
+  const data = new TextEncoder().encode(codeVerifier);
+  const hash = await window.crypto.subtle.digest('SHA-256', data);
+  const hashArray = new Uint8Array(hash);
+  const hashString = String.fromCharCode.apply(null, hashArray);
+  return base64UrlEncode(hashString, true);
+};
+
+const base64UrlEncode = (data, removePadding = false) => {
+  let result = btoa(data)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+  if (removePadding) {
+    result = result.replace(/=+$/, '')
+  }
+  return result;
+};
+
+const generateCodeVerifier = () => generateSecureRandomString(64, DEFAULT_LAKE + "-._~");
+
+const generateSecureRandomString = (len = 64, lake = DEFAULT) => {
+  const indices = new Uint8Array(len);
+  crypto.getRandomValues(indices);
+  let result = "";
+  for (let i = 0; i < len; i++) {
+    const index = indices[i] % lake.length;
+    result += lake[index];
+  }
+
+  return result;
+};
 
 const generateRandomString = (len = 10, lake = DEFAULT_LAKE) => {
   let result = "";
@@ -22,4 +63,4 @@ const generateRandomString = (len = 10, lake = DEFAULT_LAKE) => {
     result += lake[index];
   }
   return result;
-}
+};

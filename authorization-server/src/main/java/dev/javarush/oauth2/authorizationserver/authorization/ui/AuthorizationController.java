@@ -58,7 +58,9 @@ public class AuthorizationController {
         query.get("redirect_uri"),
         query.get("response_type"),
         query.get("scope"),
-        query.get("state")
+        query.get("state"),
+        query.get("code_challenge"),
+        query.get("code_challenge_method")
     );
     logger.info("Authorization request: {}", authRequest);
     Realm realm = this.authorizationService.verifyAuthRequest(authRequest);

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@CrossOrigin(value = {"http://localhost:5000"})
 @RestController
 @RequestMapping("contacts")
 public class ContactController {

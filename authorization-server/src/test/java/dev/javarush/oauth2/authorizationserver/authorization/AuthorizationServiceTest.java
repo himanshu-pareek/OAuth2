@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import dev.javarush.oauth2.authorizationserver.client.ClientRepository;
 import dev.javarush.oauth2.authorizationserver.realms.RealmRepository;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Set;
 
 import dev.javarush.oauth2.authorizationserver.scope.ScopeService;
@@ -40,21 +41,13 @@ class AuthorizationServiceTest {
         "client1",
         "http://redirect-uri.com",
         "username1",
-            Set.of("email", "profile", "email.write")
+            List.of("email", "profile", "openid", "contact.read", "contact.write"),
+            "abcd",
+            "S256"
     );
     String code = authorizationService.encodeAuthorizationCode(authorizationCode);
-    System.out.println("Code - " + code);
     AuthorizationCode decodedCode = authorizationService.decodeAuthorizationCode(code);
-    assertEquals(authorizationCode.id(), decodedCode.id());
-    assertEquals(authorizationCode.redirectURI(), decodedCode.redirectURI());
-    assertEquals(authorizationCode.username(), decodedCode.username());
-    assertEquals(authorizationCode.clientId(), decodedCode.clientId());
-    assertEquals(authorizationCode.realmId(), decodedCode.realmId());
-    assertEquals(
-        authorizationCode.expiresAt().toEpochSecond(ZoneOffset.UTC),
-        decodedCode.expiresAt().toEpochSecond(ZoneOffset.UTC)
-    );
-    assertEquals(authorizationCode.scopes(), decodedCode.scopes());
+    assertEquals(authorizationCode, decodedCode); 
   }
 
 }

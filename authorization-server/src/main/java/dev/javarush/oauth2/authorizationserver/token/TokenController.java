@@ -37,7 +37,8 @@ public class TokenController {
                 query.get("client_secret"),
                 query.get("grant_type"),
                 query.get("code"),
-                query.get("redirect_uri")
+                query.get("redirect_uri"),
+                query.get("code_verifier")
         );
         this.tokenService.verifyTokenRequest (tokenRequest);
 

@@ -9,6 +9,7 @@ import dev.javarush.oauth2.authorizationserver.crypto.JWTSigner;
 import dev.javarush.oauth2.authorizationserver.crypto.KeyPairRepository;
 import dev.javarush.oauth2.authorizationserver.realms.Realm;
 import dev.javarush.oauth2.authorizationserver.realms.RealmService;
+import dev.javarush.oauth2.authorizationserver.util.SHAUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class TokenService {
@@ -93,6 +91,28 @@ public class TokenService {
                     "invalid_grant",
                     "Invalid redirect uri"
             );
+        }
+
+        // 4. Verify Code Verifier & Code Challenge
+        if (authorizationCode.codeChallenge() != null) {
+            String oldHash = authorizationCode.codeChallenge();
+            String newHash = tokenRequest.codeVerifier();
+            if (authorizationCode.codeChallengeMethod().equals("S256")) {
+                try {
+                    newHash = SHAUtil.sha256Hash(newHash);
+                } catch (NoSuchAlgorithmException e) {
+                    throw new InvalidTokenRequestException(
+                            "invalid_request",
+                            "Code verifier is not correct"
+                    );
+                }
+            }
+            if (!Objects.equals(oldHash, newHash)) {
+                throw new InvalidTokenRequestException(
+                        "invalid_request",
+                        "Code verifier is not correct"
+                );
+            }
         }
     }
 
