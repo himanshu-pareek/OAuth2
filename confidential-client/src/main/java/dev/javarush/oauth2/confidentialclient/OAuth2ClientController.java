@@ -1,9 +1,15 @@
 package dev.javarush.oauth2.confidentialclient;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import jdk.jshell.execution.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -19,6 +25,8 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 public class OAuth2ClientController {
+
+  private static final Logger logger = LoggerFactory.getLogger(OAuth2ClientController.class);
 
   @Value("${oauth2.auth-server.auth-endpoint}")
   private String authorizationEndpoint;
@@ -94,6 +102,16 @@ public class OAuth2ClientController {
         redirectUri
     );
 
+    String codeVerifier = Utils.generateSecureRandomString (50);
+    try {
+      String codeChallenge = Utils.sha256Hash(codeVerifier);
+      request.getSession().setAttribute("code_verifier", codeVerifier);
+      authorizationUrl += String.format("&code_challenge=%s", codeChallenge);
+      authorizationUrl += "&code_challenge_method=S256";
+    } catch (NoSuchAlgorithmException e) {
+      logger.warn("Not using PKCE due to {}", e.getMessage());
+    }
+
     RedirectView redirectView = new RedirectView();
     redirectView.setUrl(authorizationUrl);
     return redirectView;
@@ -118,8 +136,6 @@ public class OAuth2ClientController {
       return "index";
     }
 
-    System.out.println("Authorization code = " + code);
-
     // Get Access Token
     String accessTokenUrl = String.format(
         "%s?grant_type=authorization_code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
@@ -129,6 +145,11 @@ public class OAuth2ClientController {
         clientId,
         clientSecret
     );
+
+    Object codeVerifier = request.getSession().getAttribute("code_verifier");
+    if (codeVerifier != null) {
+      accessTokenUrl += String.format("&code_verifier=%s", codeVerifier);
+    }
 
     Map<String, Object> tokenResponse = template.postForObject(
         accessTokenUrl,
