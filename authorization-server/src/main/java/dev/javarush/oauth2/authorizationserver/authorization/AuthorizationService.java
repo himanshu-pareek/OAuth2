@@ -43,7 +43,7 @@ public class AuthorizationService {
     this.realmRepository = realmRepository;
     this.clientRepository = clientRepository;
     this.authRequestRepository = authRequestRepository;
-      this.scopeService = scopeService;
+    this.scopeService = scopeService;
   }
 
   public Realm verifyAuthRequest(AuthRequest authRequest) {
@@ -204,8 +204,15 @@ public class AuthorizationService {
 
   public String allowAuthRequest(AuthRequest authRequest, User user, Collection<String> selectedScopes) {
     AuthorizationCode authorizationCode =
-        AuthorizationCode.authorizationCode(authRequest.realmId(), authRequest.clientId(),
-            authRequest.redirectUri(), user.getUsername(), selectedScopes);
+        AuthorizationCode.authorizationCode(
+                authRequest.realmId(),
+                authRequest.clientId(),
+            authRequest.redirectUri(),
+                user.getUsername(),
+                selectedScopes,
+                authRequest.codeChallenge(),
+                authRequest.codeChallengeMethod()
+        );
     try {
       return encodeAuthorizationCode(authorizationCode);
     } catch (RuntimeException e) {

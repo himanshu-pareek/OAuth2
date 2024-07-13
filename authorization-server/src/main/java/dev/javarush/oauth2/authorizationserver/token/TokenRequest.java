@@ -6,6 +6,7 @@ public record TokenRequest(
         String clientSecret,
         String grantType,
         String code,
-        String redirectUri
+        String redirectUri,
+        String codeVerifier
 ) {
 }

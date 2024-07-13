@@ -15,16 +15,19 @@ public class JWTSigner {
         signRSA.initSign(privateKey);
 
         String jwtHeader = "{\"typ\": \"JWT\", \"alg\": \"RS256\"}";
-        String jwtHeaderEncoded = Base64.getUrlEncoder().encodeToString(jwtHeader.getBytes(StandardCharsets.UTF_8));
+        String jwtHeaderEncoded = Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(jwtHeader.getBytes(StandardCharsets.UTF_8));
 
         String dataString = objectMapper.writeValueAsString(data);
-        String dataEncoded = Base64.getUrlEncoder().encodeToString(dataString.getBytes(StandardCharsets.UTF_8));
+        String dataEncoded = Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(dataString.getBytes(StandardCharsets.UTF_8));
 
         String inputToSign = jwtHeaderEncoded + "." + dataEncoded;
 
         signRSA.update(inputToSign.getBytes(StandardCharsets.UTF_8));
         byte[] signature = signRSA.sign();
-        String encodedSignature = Base64.getUrlEncoder().encodeToString(signature);
+        String encodedSignature = Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(signature);
 
         return inputToSign + "." + encodedSignature;
     }

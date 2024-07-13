@@ -1,5 +1,9 @@
 package dev.javarush.oauth2.authorizationserver.authorization;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.javarush.oauth2.authorizationserver.util.Strings;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -14,14 +18,18 @@ public record AuthorizationCode(
     String username,
     Collection<String> scopes,
     LocalDateTime expiresAt,
-    String id
+    String id,
+    String codeChallenge,
+    String codeChallengeMethod
 ) {
   public static AuthorizationCode authorizationCode(
       String realmId,
       String clientId,
       String redirectURI,
       String username,
-      Collection<String> scopes
+      Collection<String> scopes,
+      String codeChallenge,
+      String codeChallengeMethod
   ) {
     return new AuthorizationCode(
         realmId,
@@ -30,36 +38,32 @@ public record AuthorizationCode(
         username,
         scopes,
         LocalDateTime.now().plusMinutes(10),
-        Strings.generateRandomString(32)
+        Strings.generateRandomString(32),
+        codeChallenge,
+        codeChallengeMethod
     );
   }
 
   @Override
   public String toString() {
-    return String.format(
-        "%s##%s##%s##%s##%s##%d##%s",
-        realmId,
-        clientId,
-        redirectURI,
-        username,
-        String.join(" ", scopes),
-        expiresAt.toEpochSecond(ZoneOffset.UTC),
-        id
-    );
+      try {
+        ObjectMapper objectMapper = JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .build();
+          return objectMapper.writeValueAsString(this);
+      } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+      }
   }
 
   public static AuthorizationCode authCodeFromString(String code) {
-    String[] properties = code.split("##");
-    LocalDateTime expiresAt = LocalDateTime.ofEpochSecond(Long.parseLong(properties[5]), 0, ZoneOffset.UTC);
-    Collection<String> scopes = new HashSet<>(Arrays.asList(properties[4].split(" ")));
-    return new AuthorizationCode(
-        properties[0],
-        properties[1],
-        properties[2],
-        properties[3],
-        scopes,
-        expiresAt,
-        properties[6]
-    );
+      try {
+        ObjectMapper objectMapper = JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .build();
+          return objectMapper.readValue(code, AuthorizationCode.class);
+      } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+      }
   }
 }

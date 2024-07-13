@@ -12,14 +12,15 @@ const state = query.get('state');
 errorDiv.innerHTML = `Code = ${code} -- State = ${state}`;
 
 const fetchAccessToken = async () => {
-  localStorage.clear();
   const accessTokenUrl = generateAccessTokenUrl();
   const urlSearchParams = new URLSearchParams({
     client_id: CLIENT_ID,
     grant_type: 'authorization_code',
     code: code,
-    redirect_uri: window.location.origin + REDIRECT_URI_SUFFIX
+    redirect_uri: window.location.origin + REDIRECT_URI_SUFFIX,
+    code_verifier: localStorage.getItem('code_verifier'),
   });
+  localStorage.clear();
   const response = await fetch(accessTokenUrl, {
     method: 'POST',
     body: urlSearchParams,
@@ -28,7 +29,7 @@ const fetchAccessToken = async () => {
     }
   });
   const tokenResponse = await response.json();
-  console.log (tokenResponse);
+  console.log(tokenResponse);
   if (tokenResponse.access_token) {
     return tokenResponse.access_token;
   }
