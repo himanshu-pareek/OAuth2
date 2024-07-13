@@ -96,17 +96,21 @@ public class TokenService {
         // 4. Verify Code Verifier & Code Challenge
         if (authorizationCode.codeChallenge() != null) {
             String oldHash = authorizationCode.codeChallenge();
-            String newHash = tokenRequest.codeVerifier();
-            if (authorizationCode.codeChallengeMethod().equals("S256")) {
+            String newHash = null;
+
+            if (Objects.equals(authorizationCode.codeChallengeMethod(), "S256")) {
                 try {
-                    newHash = SHAUtil.sha256Hash(newHash);
+                    newHash = SHAUtil.sha256Hash(tokenRequest.codeVerifier());
                 } catch (NoSuchAlgorithmException e) {
                     throw new InvalidTokenRequestException(
                             "invalid_request",
                             "Code verifier is not correct"
                     );
                 }
+            } else if (Objects.equals(authorizationCode.codeChallengeMethod(), "plain")) {
+                newHash = tokenRequest.codeVerifier();
             }
+            
             if (!Objects.equals(oldHash, newHash)) {
                 throw new InvalidTokenRequestException(
                         "invalid_request",

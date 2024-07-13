@@ -11,13 +11,19 @@ export const generateAuthorizationUrl = async () => {
 
   // Proof Kye for Code Exchange (PKCE)
   const codeVerifier = generateCodeVerifier();
-  const codeChallenge = await computeCodeChallange(codeVerifier);
+  let codeChallenge = codeVerifier;
+  let codeChallengeMethod = 'plain';
   localStorage.setItem('code_verifier', codeVerifier);
+
+  try {
+      codeChallenge = await computeCodeChallange(codeVerifier);
+      codeChallengeMethod = 'S256';
+  } catch {}
 
   return `${AUTHORIZE_ENDPOINT}?client_id=${CLIENT_ID}&response_type=code` +
     `&state=${state}&redirect_uri=${redirectUri}&scope=${SCOPES}` +
     `&code_challenge=${codeChallenge}` +
-    `&code_challenge_method=S256`;
+    `&code_challenge_method=${codeChallengeMethod}`;
 };
 
 export const generateAccessTokenUrl = () => {
