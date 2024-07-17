@@ -8,6 +8,7 @@ import dev.javarush.oauth2.authorizationserver.realms.RealmService;
 import dev.javarush.oauth2.authorizationserver.scope.Scope;
 import dev.javarush.oauth2.authorizationserver.scope.ScopeService;
 import dev.javarush.oauth2.authorizationserver.user.User;
+import dev.javarush.oauth2.authorizationserver.user.UserProfile;
 import dev.javarush.oauth2.authorizationserver.user.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,9 +97,16 @@ class Bootstrap implements CommandLineRunner {
 
     // Create some users
     this.userRepository.save(new User("user1", "pass1", "java"));
+    this.userRepository.saveProfile(new UserProfile("user1", "Jon", "Doe", "jondoe@javarush.dev"));
+
     this.userRepository.save(new User("user2", "pass2", "rush"));
+    this.userRepository.saveProfile(new UserProfile("user2", "Raj", "Singh", "rajsingh@javarush.dev"));
+
     this.userRepository.save(new User("user3", "pass3", "java"));
+    this.userRepository.saveProfile(new UserProfile("user3", "Kamal", "Sharma", "kamalsharma@javarush.dev"));
+
     this.userRepository.save(new User("user4", "pass4", "rush"));
+    this.userRepository.saveProfile(new UserProfile("user4", "Palak", "Roy", "palakroy@javarush.dev"));
 
 //   logger.info("Trip client - {}", tripClient.getId());
 //   logger.info("Shopping client - {}", shopClient.getId());

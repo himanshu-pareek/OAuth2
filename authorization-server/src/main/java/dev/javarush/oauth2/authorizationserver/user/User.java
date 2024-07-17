@@ -2,9 +2,9 @@ package dev.javarush.oauth2.authorizationserver.user;
 
 public class User {
 
-  private String username;
-  private String password;
-  private String realmId;
+  private final String username;
+  private final String password;
+  private final String realmId;
 
   public User(String username, String password, String realmId) {
     this.username = username;
