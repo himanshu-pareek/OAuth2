@@ -5,11 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.javarush.oauth2.authorizationserver.util.Strings;
+
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 
 public record AuthorizationCode(
     String realmId,
@@ -46,24 +44,26 @@ public record AuthorizationCode(
 
   @Override
   public String toString() {
-      try {
-        ObjectMapper objectMapper = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .build();
-          return objectMapper.writeValueAsString(this);
-      } catch (JsonProcessingException e) {
-          throw new RuntimeException(e);
-      }
+    try {
+      ObjectMapper objectMapper = getObjectMapper();
+      return objectMapper.writeValueAsString(this);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static JsonMapper getObjectMapper() {
+    return JsonMapper.builder()
+        .addModule(new JavaTimeModule())
+        .build();
   }
 
   public static AuthorizationCode authCodeFromString(String code) {
-      try {
-        ObjectMapper objectMapper = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .build();
-          return objectMapper.readValue(code, AuthorizationCode.class);
-      } catch (JsonProcessingException e) {
-          throw new RuntimeException(e);
-      }
+    try {
+      ObjectMapper objectMapper = getObjectMapper();
+      return objectMapper.readValue(code, AuthorizationCode.class);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
