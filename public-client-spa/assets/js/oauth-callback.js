@@ -29,11 +29,7 @@ const fetchAccessToken = async () => {
     }
   });
   const tokenResponse = await response.json();
-  console.log(tokenResponse);
-  if (tokenResponse.access_token) {
-    return tokenResponse.access_token;
-  }
-
+  return tokenResponse;
 };
 
 if (!code) {
@@ -43,8 +39,18 @@ if (!code) {
 } else {
   // 3. Fetch access token from authorization server
   fetchAccessToken()
-    .then(accessToken => {
-      localStorage.setItem('access_token', accessToken);
+    .then(tokenResponse => {
+      const accessToken = tokenResponse.access_token;
+      if (accessToken) {
+        localStorage.setItem('access_token', accessToken);
+        const idToken = tokenResponse.id_token;
+      }
+
+      const idToken = tokenResponse.id_token;
+      if (idToken) {
+        localStorage.setItem ('id_token', idToken);
+      }
+      
       window.location.replace(window.location.origin);
     });
 }

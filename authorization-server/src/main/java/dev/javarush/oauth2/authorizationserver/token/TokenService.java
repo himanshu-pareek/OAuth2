@@ -25,20 +25,23 @@ import java.util.*;
 @Service
 public class TokenService {
 
-    private static Logger logger = LoggerFactory.getLogger(TokenService.class);
+    private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
 
     private final RealmService realmService;
     private final ClientService clientService;
     private final AuthorizationService authorizationService;
     private final KeyPairRepository keyPairRepository;
     private final TokenRepository tokenRepository;
+    private final IdTokenGenerator idTokenGenerator;
 
-    public TokenService(RealmService realmService, ClientService clientService, AuthorizationService authorizationService, KeyPairRepository keyPairRepository, TokenRepository tokenRepository) {
+    public TokenService(RealmService realmService, ClientService clientService, AuthorizationService authorizationService, KeyPairRepository keyPairRepository, TokenRepository tokenRepository,
+                        IdTokenGenerator idTokenGenerator) {
         this.realmService = realmService;
         this.clientService = clientService;
         this.authorizationService = authorizationService;
         this.keyPairRepository = keyPairRepository;
         this.tokenRepository = tokenRepository;
+      this.idTokenGenerator = idTokenGenerator;
     }
 
     public void verifyTokenRequest(TokenRequest tokenRequest) {
@@ -164,18 +167,19 @@ public class TokenService {
         }
     }
 
-    private String encodeAccessToken (AccessToken accessToken, String realmId) {
+    private String encodeToken(Object token, String realmId) {
         PrivateKey privateKey = keyPairRepository.getPrivateKey(realmId);
         try {
-            return new JWTSigner().sign(accessToken, privateKey);
+            return new JWTSigner().sign(token, privateKey);
         } catch (NoSuchAlgorithmException | InvalidKeyException | JsonProcessingException | SignatureException e) {
-            logger.error("Error while encoding access token: {}", e.getMessage());
+            logger.error("Error while encoding token: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
-    private Map<String, Object> generateAccessTokenResponse (String refreshToken, AccessToken accessToken, String realmId) {
-        String accessTokenEncoded = encodeAccessToken(accessToken, realmId);
+    private Map<String, Object> generateAccessTokenResponse (String refreshToken, AccessToken accessToken, String realmId, Map<String, Object> idToken) {
+        String accessTokenEncoded = encodeToken(accessToken, realmId);
+        String idTokenEncoded = encodeToken(idToken, realmId);
         long expiresIn = accessToken.expiresAt() - accessToken.issuedAt();
         long refreshTokenExpiresIn = 24 * 60 * 60;
         return Map.of(
@@ -183,7 +187,8 @@ public class TokenService {
                 "expires_in", expiresIn,
                 "token_type", "Bearer",
                 "refresh_token", refreshToken,
-                "refresh_token_expires_in", refreshTokenExpiresIn
+                "refresh_token_expires_in", refreshTokenExpiresIn,
+            "id_token", idTokenEncoded
         );
     }
 
@@ -197,7 +202,13 @@ public class TokenService {
                 authorizationCode.scopes()
         );
         String refreshToken = this.tokenRepository.saveAccessToken(accessToken);
-        return generateAccessTokenResponse(refreshToken, accessToken, authorizationCode.realmId());
+        Map<String, Object> idToken = idTokenGenerator.generate(
+            authorizationCode.username(),
+            authorizationCode.scopes(),
+            authorizationCode.realmId(),
+            authorizationCode.clientId()
+        );
+        return generateAccessTokenResponse(refreshToken, accessToken, authorizationCode.realmId(), idToken);
     }
 
     public List<String> getAllowedOrigins(String realmId) {

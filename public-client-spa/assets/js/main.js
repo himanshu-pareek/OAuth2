@@ -46,10 +46,67 @@ const fetchContacts = async () => {
     }
 }
 
+const getEncodedUserInformation = (idToken) => {
+  const tokenParts = idToken.split('\.');
+  if (tokenParts.length == 1) {
+    return tokenParts[0];
+  } else {
+    return tokenParts[1];
+  }
+};
+
+const base64UrlDecode = (data) => {
+  const base64EncodedData = data.replace(/\-/g, '+')
+    .replace(/\_/g, '/');
+  return atob(base64EncodedData);
+};
+
+const decodeUserInformation = (encodedUserInformation) => {
+  return base64UrlDecode(encodedUserInformation);
+};
+
+const getUserInformationFromIdToken = (idToken) => {
+  const encodedUserInformation = getEncodedUserInformation(idToken);
+  const decodedUserInformation = decodeUserInformation(encodedUserInformation);
+  return JSON.parse(decodedUserInformation);
+};
+
+const printObjectAsTable = (data, title) => {
+  contentDiv.innerHTML += `<h3>${title}</h3>`;
+
+  let rows = '';
+  for (let attribute in data) {
+    rows += `<tr><td>${attribute}</td><td>${data[attribute]}</td></tr>`;
+  }
+  contentDiv.innerHTML += `
+    <table>
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Value</th>
+        </tr>
+      <thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+};
+
+const printUserInformationFromIdToken = () => {
+  const idToken = localStorage.getItem('id_token');
+  if (idToken) {
+    const userInformation = getUserInformationFromIdToken(idToken);
+    printObjectAsTable(userInformation, 'Id Token Information');
+  }
+};
+
 if (accessToken) {
   contentDiv.innerHTML = `Access Token = ${accessToken}`;
   fetchUserInformation();
   fetchContacts();
+
+  printUserInformationFromIdToken();
 } else {
   // 1. Access token is not present - Redirect the user to authorization server for login
   // and authorizing application
@@ -59,3 +116,4 @@ if (accessToken) {
     })
     .catch(e => console.error (e));
 }
+

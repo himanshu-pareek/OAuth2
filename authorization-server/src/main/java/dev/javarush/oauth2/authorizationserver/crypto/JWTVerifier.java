@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Base64;
+import java.util.Map;
 
 public class JWTVerifier<T> {
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -14,6 +15,7 @@ public class JWTVerifier<T> {
     private final String jwt;
     private String inputToSignature;
     private String encodedSignature;
+    private Map header;
 
     public JWTVerifier(String jwt, Class<T> clazz) {
         this.jwt = jwt;
@@ -32,10 +34,15 @@ public class JWTVerifier<T> {
         this.inputToSignature = encodedHeader + "." + encodedData;
 
         byte[] data = Base64.getUrlDecoder().decode(encodedData);
+        byte[] headerBytes = Base64.getUrlDecoder().decode(encodedHeader);
 
         this.token = objectMapper.readValue(
                 new String(data),
                 this.clazz
+        );
+        this.header = objectMapper.readValue(
+            new String(headerBytes),
+            Map.class
         );
     }
 
@@ -61,5 +68,12 @@ public class JWTVerifier<T> {
             parse();
         }
         return this.token;
+    }
+
+    public Map getHeader() throws InvalidJWTException, JsonProcessingException {
+        if (this.header == null) {
+            parse();
+        }
+        return this.header;
     }
 }

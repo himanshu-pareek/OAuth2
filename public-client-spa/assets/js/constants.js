@@ -3,7 +3,7 @@ export const AUTHORIZE_ENDPOINT = 'http://auth.localhost:9000/realms/java/auth';
 export const TOKEN_ENDPOINT = 'http://auth.localhost:9000/realms/java/token';
 
 // Related to client application
-export const CLIENT_ID = 'GALjGVmEnoBch0AAgwmNhlt4CP3xcbVl';
+export const CLIENT_ID = 'nA0LzOZZlEfrmUahBDnLlVqe2JlICEEx';
 export const REDIRECT_URI_SUFFIX = '/oauth/callback';
 
 // Related to resource server
